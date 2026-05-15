@@ -90,88 +90,69 @@ def get_video_stats(video_id):
 
 def get_transcript(video_id):
     """
-    Get YouTube transcript using youtube-transcript-api.
+    Get YouTube transcript - REAL transcript from YouTube.
     Tries multiple methods to get captions including auto-generated.
     """
     try:
-        from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+        from youtube_transcript_api import YouTubeTranscriptApi
+        from youtube_transcript_api._errors import (
+            TranscriptsDisabled, NoTranscriptFound, 
+            VideoUnavailable, AgeRestricted, ProxyError
+        )
         
-        # Method 1: Try with YouTubeTranscriptApi directly (correct way for auto-captions)
+        transcript = None
+        
+        # Method 1: Try the standard way (preferred for auto-captions)
         try:
-            # Get transcript list first
+            # Get all available transcripts
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
             
-            # Try to find any transcript (including auto-generated)
+            # Find the best transcript: prefer English, including auto-generated
             try:
-                # Try auto-generated English first
-                transcript = transcript_list.find_transcript(['en'])
+                # Try to find English transcript first (including auto-generated)
+                transcript = transcript_list.find_transcript(['en']).fetch()
+            except NoTranscriptFound:
+                # Try any English variant
+                for code in ['en-US', 'en-GB', 'en-AU']:
+                    try:
+                        transcript = transcript_list.find_transcript([code]).fetch()
+                        break
+                    except:
+                        continue
             except:
-                try:
-                    # Try any English transcript
-                    transcript = transcript_list.find_transcript(['en-US', 'en-GB'])
-                except:
-                    # Get the first available transcript
-                    transcript = transcript_list.find_transcript(['en'])
+                pass
             
-            # Fetch the actual transcript data
-            transcript_data = transcript.fetch()
+            # If still no transcript, try the first available one
+            if not transcript or (transcript and len(transcript) == 0):
+                for ts in transcript_list:
+                    try:
+                        if ts.language_code.startswith('en'):
+                            transcript = ts.fetch()
+                            break
+                    except:
+                        continue
             
-            lines = []
-            for entry in transcript_data:
-                mins = int(entry.start) // 60
-                secs = int(entry.start) % 60
-                text = entry.text.replace('\n', ' ').replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('<[^>]+>', '').strip()
-                if text and len(text) > 1:
-                    lines.append(f"[{mins:02d}:{secs:02d}] {text}")
-            
-            if lines:
-                return '\n'.join(lines)
-                
-        except Exception as e:
-            print(f"Method 1 failed: {e}")
-        
-        # Method 2: Try manual approach with languages
-        try:
-            # Get all available transcripts info
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            
-            all_transcripts = []
-            for transcript in transcript_list:
-                all_transcripts.append({
-                    'language_code': transcript.language_code,
-                    'language': transcript.language,
-                    'is_generated': transcript.is_generated,
-                    'is_translatable': transcript.is_translatable
-                })
-            
-            print(f"Available transcripts: {all_transcripts}")
-            
-            # Try each transcript
-            for ts_info in all_transcripts:
-                try:
-                    transcript = transcript_list.find_transcript([ts_info['language_code']])
-                    data = transcript.fetch()
-                    lines = []
-                    for entry in data:
-                        mins = int(entry.start) // 60
-                        secs = int(entry.start) % 60
-                        text = entry.text.replace('\n', ' ').strip()
-                        if text:
-                            lines.append(f"[{mins:02d}:{secs:02d}] {text}")
-                    if lines:
-                        return '\n'.join(lines)
-                except:
-                    continue
+            if transcript:
+                lines = []
+                for entry in transcript:
+                    mins = int(entry.start) // 60
+                    secs = int(entry.start) % 60
+                    text = entry.text.replace('\n', ' ').replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('<[^>]+>', '').strip()
+                    if text and len(text) > 1:
+                        lines.append(f"[{mins:02d}:{secs:02d}] {text}")
+                if lines:
+                    return '\n'.join(lines)
                     
+        except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable, AgeRestricted, ProxyError) as e:
+            print(f"YouTube API method 1 blocked: {type(e).__name__}")
         except Exception as e:
-            print(f"Method 2 failed: {e}")
+            print(f"YouTube API method 1 error: {type(e).__name__}: {e}")
         
-        # Method 3: Try the old way (fetch without list)
+        # Method 2: Try with get_transcript (legacy method)
         try:
-            from youtube_transcript_api import YouTubeTranscriptApi
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
+            raw = YouTubeTranscriptApi.get_transcript(video_id)
             lines = []
-            for entry in transcript:
+            for entry in raw:
                 mins = int(entry['start']) // 60
                 secs = int(entry['start']) % 60
                 text = entry['text'].replace('\n', ' ').strip()
@@ -180,15 +161,30 @@ def get_transcript(video_id):
             if lines:
                 return '\n'.join(lines)
         except Exception as e:
-            print(f"Method 3 failed: {e}")
+            print(f"YouTube API method 2 error: {type(e).__name__}: {e}")
+        
+        # Method 3: Try with proxy (sometimes helps)
+        try:
+            raw = YouTubeTranscriptApi.get_transcript(
+                video_id, 
+                languages=['en', 'en-US', 'en-GB']
+            )
+            lines = []
+            for entry in raw:
+                mins = int(entry['start']) // 60
+                secs = int(entry['start']) % 60
+                text = entry['text'].replace('\n', ' ').strip()
+                if text:
+                    lines.append(f"[{mins:02d}:{secs:02d}] {text}")
+            if lines:
+                return '\n'.join(lines)
+        except Exception as e:
+            print(f"YouTube API method 3 error: {type(e).__name__}: {e}")
         
         return None
         
-    except TranscriptsDisabled:
-        print("Transcripts are disabled for this video")
-        return None
-    except NoTranscriptFound:
-        print("No transcript found for this video")
+    except ImportError:
+        print("youtube-transcript-api not installed")
         return None
     except Exception as e:
         print(f"Transcript error: {type(e).__name__}: {e}")
@@ -228,6 +224,7 @@ def video():
 
 @app.route('/transcript', methods=['GET'])
 def transcript():
+    """Get REAL transcript from YouTube (no AI)"""
     video_id = request.args.get('video_id', '')
     video_id = extract_video_id(video_id)
     if not video_id:
@@ -235,9 +232,17 @@ def transcript():
 
     transcript = get_transcript(video_id)
     if transcript:
-        return jsonify({'success': True, 'transcript': transcript})
+        return jsonify({
+            'success': True, 
+            'transcript': transcript,
+            'hasRealTranscript': True
+        })
 
-    return jsonify({'error': 'No transcript available for this video', 'success': False}), 404
+    return jsonify({
+        'success': False, 
+        'error': 'No transcript available for this video',
+        'hasRealTranscript': False
+    }), 404
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -263,12 +268,13 @@ VIEWS: {views}
 HAS REAL TRANSCRIPT: {'Yes' if has_real_transcript else 'No'}
 {'-' * 40}
 VIDEO TRANSCRIPT:
-{transcript if transcript else 'NO TRANSCRIPT - The analysis MUST be based on title: "' + title + '". Be honest that no transcript is available.'}
+{transcript if transcript else 'NO TRANSCRIPT - Say "No transcript available" in every field.'}
 {'-' * 40}
 
 RULES:
-- If NO transcript: Say "No transcript available" in every field
+- If NO transcript: Say "No transcript available" in every field honestly
 - NEVER use placeholder text like "topic 1", "point 1"
+- Analyze REAL content only
 - Return valid JSON only
 
 JSON:
