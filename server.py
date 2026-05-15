@@ -1,6 +1,6 @@
 """
 YouTube AI Analyzer - Backend Server
-Designed for Railway deployment
+Supadata API Edition
 """
 
 import os
@@ -15,6 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+SUPADATA_API_KEY = os.environ.get('SUPADATA_API_KEY', '')
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
 
 client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
@@ -89,25 +90,25 @@ def get_video_stats(video_id):
         return None
 
 def get_transcript(video_id):
-    """Get YouTube transcript using youtube-transcript-api"""
+    """Get transcript using Supadata API"""
+    if not SUPADATA_API_KEY:
+        print("No Supadata API key configured")
+        return None
+    
     try:
-        from youtube_transcript_api import YouTubeTranscriptApi
-        
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        lines = []
-        for entry in transcript:
-            mins = int(entry['start']) // 60
-            secs = int(entry['start']) % 60
-            text = entry['text'].replace('\n', ' ').strip()
-            if text:
-                lines.append(f"[{mins:02d}:{secs:02d}] {text}")
-        if lines:
-            return '\n'.join(lines)
-            
-    except ImportError:
-        print("youtube_transcript_api not installed")
+        url = f"https://api.supadata.ai/v1/transcript?url=https://youtu.be/{video_id}"
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0',
+            'x-api-key': SUPADATA_API_KEY
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read())
+            if data.get('content'):
+                return data['content']
+            elif data.get('text'):
+                return data['text']
     except Exception as e:
-        print(f"Transcript error: {type(e).__name__}: {e}")
+        print(f"Supadata error: {type(e).__name__}: {e}")
     
     return None
 
@@ -119,33 +120,9 @@ def health():
     return jsonify({
         'status': 'ok',
         'ai': bool(client),
-        'google': bool(GOOGLE_API_KEY)
+        'google': bool(GOOGLE_API_KEY),
+        'supadata': bool(SUPADATA_API_KEY)
     })
-
-@app.route('/debug-transcript', methods=['GET'])
-def debug_transcript():
-    """Debug transcript extraction"""
-    video_id = 'dQw4w9WgXcQ'
-    results = {}
-    
-    try:
-        import youtube_transcript_api
-        results['library_version'] = youtube_transcript_api.__version__
-        results['library_installed'] = True
-    except ImportError as e:
-        results['library_installed'] = False
-        results['import_error'] = str(e)
-        return jsonify(results)
-    
-    try:
-        from youtube_transcript_api import YouTubeTranscriptApi
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        results['old_method'] = f'SUCCESS - {len(transcript)} entries'
-        results['sample'] = transcript[0] if transcript else None
-    except Exception as e:
-        results['old_method'] = f'FAILED: {type(e).__name__}: {str(e)}'
-    
-    return jsonify(results)
 
 @app.route('/video', methods=['GET'])
 def video():
@@ -170,7 +147,7 @@ def video():
 
 @app.route('/transcript', methods=['GET'])
 def transcript():
-    """Get transcript from YouTube"""
+    """Get transcript from YouTube via Supadata"""
     video_id = request.args.get('video_id', '')
     video_id = extract_video_id(video_id)
     if not video_id:
@@ -186,7 +163,7 @@ def transcript():
 
     return jsonify({
         'success': False, 
-        'error': 'No transcript available for this video. This video may not have captions.'
+        'error': 'No transcript available for this video.'
     }), 404
 
 @app.route('/analyze', methods=['POST'])
