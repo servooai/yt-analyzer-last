@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube AI Analyzer - Full Featured</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--red:#FF0000;--cyan:#00D9FF;--gold:#FFD700;--purple:#8B5CF6;--bg:#0F0F1A;--surface:#1A1A2E;--elevated:#242438;--success:#00FF88;--text:#fff;--text2:#A0A0B0;--border:rgba(255,255,255,0.08)}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .container{max-width:1200px;margin:0 auto;padding:2rem 1rem}
+    .header{text-align:center;margin-bottom:2rem;padding:2rem;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(0,217,255,0.1));border-radius:24px;border:1px solid var(--purple)}
+    .logo{width:80px;height:80px;background:linear-gradient(135deg,var(--red),var(--purple));border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(139,92,246,0.5)}50%{box-shadow:0 0 50px rgba(139,92,246,0.7)}}
+    .logo svg{width:40px;height:40px;color:white}
+    .header h1{font-size:2rem;font-weight:800;background:linear-gradient(90deg,var(--red),var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .header p{color:var(--text2);margin-top:0.5rem}
+    .url-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem}
+    .url-section h3{color:var(--cyan);margin-bottom:1rem;font-size:1.1rem}
+    .url-group{display:flex;gap:0.75rem}
+    .url-input{flex:1;background:var(--elevated);border:2px solid var(--border);border-radius:12px;padding:1rem;color:var(--text);font-size:1rem;outline:none}
+    .url-input:focus{border-color:var(--red)}
+    .analyze-btn{padding:1rem 2rem;background:var(--red);border:none;border-radius:12px;color:white;font-weight:700;cursor:pointer;transition:all 0.3s}
+    .analyze-btn:hover{transform:scale(1.02)}
+    .analyze-btn:disabled{opacity:0.5}
+    .video-info{background:var(--elevated);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;display:none}
+    .video-info.show{display:block}
+    .video-main{display:flex;gap:1rem;margin-bottom:1rem}
+    .video-thumb{width:200px;height:112px;border-radius:10px;object-fit:cover;flex-shrink:0}
+    .video-details{flex:1}
+    .video-details h2{font-size:1.1rem;font-weight:700;margin-bottom:0.3rem;line-height:1.3}
+    .video-channel{color:var(--text2);font-size:0.9rem;margin-bottom:0.3rem}
+    .video-desc{color:var(--text2);font-size:0.85rem;max-height:50px;overflow:hidden}
+    .video-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
+    .stat-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.75rem;text-align:center}
+    .stat-item .value{font-size:1.3rem;font-weight:800;color:var(--cyan)}
+    .stat-item .label{font-size:0.7rem;color:var(--text2)}
+    .stat-item.highlight{background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,217,255,0.1));border-color:var(--success)}
+    .stat-item.highlight .value{color:var(--success)}
+    .tools-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem}
+    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1rem;cursor:pointer;transition:all 0.3s;text-align:center}
+    .tool-card:hover,.tool-card.active{border-color:var(--purple);transform:translateY(-4px)}
+    .tool-card .icon{width:45px;height:45px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.3rem}
+    .tool-card.transcript .icon{background:rgba(255,0,0,0.2);color:var(--red)}
+    .tool-card.hook .icon{background:rgba(139,92,246,0.2);color:var(--purple)}
+    .tool-card.script .icon{background:rgba(0,217,255,0.2);color:var(--cyan)}
+    .tool-card.titles .icon{background:rgba(255,215,0,0.2);color:var(--gold)}
+    .tool-card.desc .icon{background:rgba(0,255,136,0.2);color:var(--success)}
+    .tool-card h4{font-size:0.9rem;margin-bottom:0.2rem}
+    .tool-card span{font-size:0.75rem;color:var(--text2)}
+    .content-area{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;display:none}
+    .content-area.show{display:block}
+    .content-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+    .content-header h3{color:var(--purple);font-size:1.1rem}
+    .copy-btn{padding:0.6rem 1.2rem;background:var(--elevated);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:0.85rem;transition:all 0.2s}
+    .copy-btn:hover{border-color:var(--cyan);background:var(--cyan);color:var(--bg)}
+    .copy-btn.copied{background:var(--success);border-color:var(--success);color:var(--bg)}
+    .result-text{background:var(--elevated);border:1px solid var(--border);border-radius:12px;padding:1rem;line-height:1.8;white-space:pre-wrap;max-height:500px;overflow-y:auto;margin-bottom:1rem;font-size:0.95rem}
+    .result-list{list-style:none;padding:0}
+    .result-list li{padding:0.75rem;background:var(--elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:0.5rem;cursor:pointer;transition:all 0.2s}
+    .result-list li:hover{border-color:var(--purple);transform:translateX(4px)}
+    .result-list li span{color:var(--purple);font-weight:bold;margin-right:0.5rem}
+    .loading-state{padding:2rem;text-align:center;color:var(--text2)}
+    .loading-state svg{animation:spin 1s linear infinite;margin-bottom:1rem}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .error-box{background:rgba(255,71,87,0.1);border:1px solid #FF4757;border-radius:12px;padding:1rem;color:#FF4757;margin-bottom:1rem}
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid var(--success);border-radius:12px;padding:1rem 1.5rem;z-index:1000;opacity:0;transition:all 0.3s}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    .toast.error{border-color:#FF4757}
+    @media(max-width:900px){.tools-grid{grid-template-columns:repeat(3,1fr)}.url-group{flex-direction:column}.video-main{flex-direction:column}.video-thumb{width:100%}}
+    @media(max-width:600px){.tools-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <h1>YouTube AI Analyzer</h1>
+      <p>AI-Powered Content Creator Tool - Full Version</p>
+    </div>
+    <div class="url-section">
+      <h3>Enter Video URL</h3>
+      <div class="url-group">
+        <input type="text" class="url-input" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+        <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">Analyze</button>
+        <span id="backendStatus" style="color: var(--text2); font-size: 0.8rem; display: none;"></span>
+      </div>
+      <p style="font-size: 0.75rem; color: var(--text2); margin-top: 0.5rem;">
+        <span id="transcriptMode">Frontend mode - using AI fallback</span>
+      </p>
+    </div>
+    <div class="video-info" id="videoInfo">
+      <div class="video-main">
+        <img class="video-thumb" id="vThumb" src="" alt="">
+        <div class="video-details">
+          <h2 id="vTitle"></h2>
+          <div class="video-channel" id="vChannel"></div>
+          <p class="video-desc" id="vDesc"></p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="stat-item"><div class="value" id="sViews">0</div><div class="label">Views</div></div>
+        <div class="stat-item"><div class="value" id="sLikes">0</div><div class="label">Likes</div></div>
+        <div class="stat-item"><div class="value" id="sComments">0</div><div class="label">Comments</div></div>
+        <div class="stat-item highlight"><div class="value" id="sEngagement">0%</div><div class="label">Engagement</div></div>
+      </div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card transcript" onclick="showTool('transcript')"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h4>Full Script</h4><span>Download</span></div>
+      <div class="tool-card hook" onclick="showTool('hook')"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><h4>Hook Analysis</h4><span>First minute</span></div>
+      <div class="tool-card script" onclick="showTool('script')"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><h4>Similar Script</h4><span>Generate new</span></div>
+      <div class="tool-card titles" onclick="showTool('titles')"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div><h4>10 Titles</h4><span>SEO titles</span></div>
+      <div class="tool-card desc" onclick="showTool('desc')"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg></div><h4>Description</h4><span>+ Hashtags</span></div>
+    </div>
+    <div id="transcriptArea" class="content-area">
+      <div class="content-header"><h3>Full Video Script (Complete Transcript)</h3><button class="copy-btn" onclick="copySection('transcript')">Copy Script</button></div>
+      <div id="transcriptBody"><div class="loading-state">Click "Full Script" to download the complete transcript</div></div>
+    </div>
+    <div id="hookArea" class="content-area">
+      <div class="content-header"><h3>Hook Analysis - First Minute Deep Analysis</h3><button class="copy-btn" onclick="copySection('hook')">Copy All</button></div>
+      <div id="hookBody"><div class="loading-state">Click "Hook Analysis" to analyze the first minute</div></div>
+    </div>
+    <div id="scriptArea" class="content-area">
+      <div class="content-header"><h3>Similar Script Generator</h3><button class="copy-btn" onclick="copySection('script')">Copy Script</button></div>
+      <div id="scriptBody"><div class="loading-state">Click "Similar Script" to generate a new script</div></div>
+    </div>
+    <div id="titlesArea" class="content-area">
+      <div class="content-header"><h3>10 Suggested Titles</h3><button class="copy-btn" onclick="copySection('titles')">Copy All Titles</button></div>
+      <div id="titlesBody"><div class="loading-state">Click "10 Titles" to generate titles</div></div>
+    </div>
+    <div id="descArea" class="content-area">
+      <div class="content-header"><h3>Description + Hashtags</h3><button class="copy-btn" onclick="copySection('desc')">Copy Description</button></div>
+      <div id="descBody"><div class="loading-state">Click "Description" to generate</div></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span id="toastMsg">Done</span></div>
+  <script>
+    const ytKey = 'AIzaSyBqKSnSxkXoR_aJWjsvVJx2PC5v0mELi_U';
+    const openaiKey = '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';
+
+    // ⚠️ IMPORTANT: Set your deployed backend URL here after deploying!
+    // Example: const BACKEND_URL = 'https://your-app.onrender.com';
+    // Leave empty to use frontend-only mode (less accurate)
+    const BACKEND_URL = 'https://youtube-ai-analyzer-2559.onrender.com';
+
+    let currentVideo = null, fullAnalysis = {};
+
+    function extractId(url) {
+      const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    function fmtNum(n) {
+      if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    async function getTranscript(videoId) {
+      // First, try backend if configured
+      if (BACKEND_URL) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/transcript?video_id=${videoId}`, { timeout: 10000 });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.transcript) {
+              return data.transcript;
+            }
+          }
+        } catch (e) {
+          console.log('Backend not available, trying fallback');
+        }
+      }
+
+      // Fallback to frontend-only transcript endpoints
+      const endpoints = [
+        `https://youtube.com/api/timedtext?v=${videoId}&lang=en`,
+        `https://youtubetranscript.com/?video_id=${videoId}`,
+        `https://www.tastyapps.tech/api/transcript?video_id=${videoId}`
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, { method: 'GET', mode: 'cors' });
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.length > 50 && !text.includes('error')) {
+              return parseTranscript(text, videoId);
+            }
+          }
+        } catch (e) { continue; }
+      }
+      return null;
+    }
+
+    function parseTranscript(xmlText, videoId) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlText, 'text/xml');
+        const texts = doc.querySelectorAll('text');
+        let transcript = '';
+        let lastStart = 0;
+
+        texts.forEach(t => {
+          const start = parseFloat(t.getAttribute('start') || '0');
+          const dur = parseFloat(t.getAttribute('dur') || '0');
+          const content = t.textContent;
+
+          if (content && content.trim()) {
+            const mins = Math.floor(start / 60);
+            const secs = Math.floor(start % 60).toString().padStart(2, '0');
+            transcript += `[${mins}:${secs}] ${content.trim()}\n`;
+          }
+        });
+
+        return transcript || null;
+      } catch (e) { return null; }
+    }
+
+    async function startAnalysis() {
+      const url = document.getElementById('videoUrl').value;
+      const id = extractId(url);
+      if (!id) { showToast('Invalid URL', true); return; }
+
+      const btn = document.getElementById('analyzeBtn');
+      btn.textContent = 'Loading...';
+      btn.disabled = true;
+
+      try {
+        const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
+        const oembed = await oembedRes.json();
+
+        const proxyUrls = [
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${id}&key=${ytKey}`)}`,
+          `https://corsproxy.io/?${encodeURIComponent(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${id}&key=${ytKey}`)}`
+        ];
+
+        let detailedStats = { viewCount: '0', likeCount: '0', commentCount: '0' };
+        let videoDesc = '';
+
+        for (const proxyUrl of proxyUrls) {
+          try {
+            const statsRes = await fetch(proxyUrl, { timeout: 8000 });
+            if (statsRes.ok) {
+              const statsData = await statsRes.json();
+              if (statsData.items && statsData.items[0]) {
+                const item = statsData.items[0];
+                detailedStats = item.statistics || detailedStats;
+                videoDesc = item.snippet.description || '';
+                break;
+              }
+            }
+          } catch (e) { continue; }
+        }
+
+        const views = parseInt(detailedStats.viewCount || '0');
+        const likes = parseInt(detailedStats.likeCount || '0');
+        const comments = parseInt(detailedStats.commentCount || '0');
+
+        currentVideo = {
+          id,
+          vTitle: oembed.title,
+          vChannel: oembed.author_name,
+          vThumb: oembed.thumbnail_url,
+          vDesc: videoDesc,
+          vViews: views,
+          vLikes: likes,
+          vComments: comments,
+          vEngagement: views > 0 ? ((likes + comments) / views * 100).toFixed(2) : 0,
+          vTranscript: null
+        };
+
+        // Update status based on backend configuration
+        const modeEl = document.getElementById('transcriptMode');
+        const statusEl = document.getElementById('backendStatus');
+        if (BACKEND_URL) {
+          modeEl.textContent = 'Backend connected - REAL transcripts enabled!';
+          modeEl.style.color = 'var(--success)';
+          statusEl.textContent = '✓ Backend Active';
+          statusEl.style.display = 'inline';
+          statusEl.style.color = 'var(--success)';
+        } else {
+          modeEl.textContent = 'Frontend mode - using AI fallback (less accurate)';
+          modeEl.style.color = 'var(--text2)';
+          statusEl.textContent = '⚠ No Backend';
+          statusEl.style.display = 'inline';
+          statusEl.style.color = 'var(--gold)';
+        }
+
+        showToast('Loading video data...');
+
+        try {
+          const transcriptData = await getTranscript(id);
+          if (transcriptData) {
+            currentVideo.vTranscript = transcriptData;
+            showToast('Transcript loaded!');
+          } else {
+            showToast('Getting transcript via AI...');
+          }
+        } catch (e) {
+          console.log('Transcript API not available, using AI');
+        }
+
+        document.getElementById('vThumb').src = currentVideo.vThumb;
+        document.getElementById('vTitle').textContent = currentVideo.vTitle;
+        document.getElementById('vChannel').textContent = currentVideo.vChannel;
+        document.getElementById('vDesc').textContent = currentVideo.vDesc ? currentVideo.vDesc.substring(0, 150) + '...' : 'Loading full info...';
+        document.getElementById('sViews').textContent = fmtNum(currentVideo.vViews);
+        document.getElementById('sLikes').textContent = fmtNum(currentVideo.vLikes);
+        document.getElementById('sComments').textContent = fmtNum(currentVideo.vComments);
+        document.getElementById('sEngagement').textContent = currentVideo.vEngagement + '%';
+        document.getElementById('videoInfo').classList.add('show');
+
+        showToast('Video Loaded - Full Details!');
+      } catch (e) {
+        showToast(e.message, true);
+      }
+      btn.textContent = 'Analyze';
+      btn.disabled = false;
+    }
+
+    async function showTool(tool) {
+      if (!currentVideo) { showToast('Analyze a video first', true); return; }
+
+      document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.querySelectorAll('.content-area').forEach(a => a.classList.remove('show'));
+      document.getElementById(tool + 'Area').classList.add('show');
+      document.getElementById(tool + 'Area').scrollIntoView({ behavior: 'smooth' });
+
+      const body = document.getElementById(tool + 'Body');
+      body.innerHTML = '<div class="loading-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Analyzing with AI...</div>';
+
+      const transcriptInfo = currentVideo.vTranscript
+        ? `\n\nREAL TRANSCRIPT FROM VIDEO:\n${currentVideo.vTranscript}\n\nNote: The above is the actual video transcript. Use it to provide accurate analysis.`
+        : '';
+
+      const prompts = {
+        transcript: `You are a YouTube content analyst. Based on this video info, provide a COMPLETE and DETAILED script analysis:
+
+Video Title: ${currentVideo.vTitle}
+Channel: ${currentVideo.vChannel}
+Views: ${currentVideo.vViews.toLocaleString()}
+Description: ${currentVideo.vDesc || 'No description available'}${transcriptInfo}
+
+IMPORTANT: ${currentVideo.vTranscript ? 'Use the REAL TRANSCRIPT above to provide 100% accurate analysis. This is the actual video content.' : 'Provide the most detailed script possible based on the video information available.'}
+
+Include:
+1. mainTopics: Array of main topics discussed (5-8 topics)
+2. keyPoints: Array of 20+ key points from the video content
+3. fullScript: COMPLETE transcript - be very detailed, include timestamps, exact words where possible
+4. hookUsed: What hook/opening technique was used to grab attention
+
+Reply ONLY with valid JSON format:
+{"mainTopics":["topic1","topic2","topic3","topic4","topic5"],"keyPoints":["point1","point2","point3","point4","point5","point6","point7","point8","point9","point10","point11","point12","point13","point14","point15","point16","point17","point18","point19","point20"],"fullScript":"Detailed complete script with introduction, main content sections with timestamps, and conclusion. Include exact quotes where possible.","hookUsed":"Description of the exact hook used in the first 30 seconds"}`,
+
+        hook: `Analyze this video's hook in extreme detail:
+
+Title: ${currentVideo.vTitle}
+Channel: ${currentVideo.vChannel}
+Views: ${currentVideo.vViews.toLocaleString()}
+Engagement: ${currentVideo.vEngagement}%
+Description: ${currentVideo.vDesc || ''}${transcriptInfo}
+
+${currentVideo.vTranscript ? 'REAL TRANSCRIPT AVAILABLE - use it for exact hook analysis.' : 'Analyze based on available information.'}
+
+Provide DEEP analysis:
+1. hookAnalysis: EXACT words used in the first 60 seconds, psychological triggers, emotional appeal, voice tone analysis, visual elements
+2. whyViral: 5-7 specific technical reasons why this video performed well
+3. suggestedHooks: 10 new hooks that follow the SAME patterns but are original - each with style, exact wording, and when to use
+
+Reply ONLY with valid JSON:
+{"hookAnalysis":"Complete detailed analysis of the hook - exact words, techniques, psychological triggers...","whyViral":["Technical reason 1 - specific example from this video","Technical reason 2","Technical reason 3","Technical reason 4","Technical reason 5","Technical reason 6","Technical reason 7"],"suggestedHooks":["Hook 1 - Style: emotional/shocking/storytelling, Exact words: '...', When to use: ...","Hook 2 - Style: ..., Exact words: '...', When to use: ...","Hook 3 - Style: ..., Exact words: '...', When to use: ..."]}`,
+
+        script: `Create a NEW complete script similar to this video:
+
+Title: ${currentVideo.vTitle}
+Channel: ${currentVideo.vChannel}
+Views: ${currentVideo.vViews.toLocaleString()}${transcriptInfo}
+
+${currentVideo.vTranscript ? 'IMPORTANT: Use the real transcript above as reference for style, tone, and structure.' : 'Create a script based on the video information.'}
+
+Create a COMPLETE script:
+1. newHook: POWERFUL hook for first 15-30 seconds with EXACT words to say
+2. newScript: FULL detailed script with timestamps, section headers, key talking points, word-for-word narration
+3. keyMoments: 5-7 specific moments with timestamps that will drive engagement
+
+Reply ONLY with valid JSON:
+{"newHook":"Exact words to say in first 15-30 seconds to hook viewers immediately...","newScript":"[0:00-0:30] INTRODUCTION: Exact words...\n[0:30-1:00] HOOK REINFORCEMENT: Exact words...\n[1:00-2:00] SECTION 1: Topic and exact narration...\n[2:00-3:00] SECTION 2: Topic and exact narration...\n[3:00-4:00] SECTION 3: Topic and exact narration...\n[4:00-5:00] CONCLUSION: Call to action and exact words...","keyMoments":["[0:15] - Key moment description and why it works","[1:30] - Key moment description and why it works","[2:45] - Key moment description and why it works","[3:30] - Key moment description and why it works","[4:15] - Key moment description and why it works","[4:45] - Key moment description and why it works","[5:00] - Final hook moment"]}`,
+
+        titles: `Generate 10 POWERFUL YouTube titles for this video:
+
+Original Title: ${currentVideo.vTitle}
+Channel: ${currentVideo.vChannel}
+Views: ${currentVideo.vViews.toLocaleString()}
+
+Requirements:
+- Each under 60 characters
+- COMPLETELY different from original
+- Uses psychological triggers (curiosity gap, FOMO, urgency, emotion, numbers)
+- Includes SEO keywords
+- Creates irresistible click-worthiness
+
+Reply ONLY with JSON array:
+["Powerful Title 1 - Uses curiosity gap","Powerful Title 2 - Uses numbers and urgency","Powerful Title 3 - Uses emotional trigger","Powerful Title 4 - Uses FOMO","Powerful Title 5 - Uses mystery","Powerful Title 6 - Uses bold claim","Powerful Title 7 - Uses question hook","Powerful Title 8 - Uses contrast/surprise","Powerful Title 9 - Uses storytelling","Powerful Title 10 - Uses authority/trust"]`,
+
+        desc: `Create professional SEO-optimized description for:
+
+Title: ${currentVideo.vTitle}
+Channel: ${currentVideo.vChannel}
+Views: ${currentVideo.vViews.toLocaleString()}
+
+Create:
+1. description: 250-350 words engaging description that:
+   - Hooks reader in first line
+   - Explains value and what they'll learn
+   - Creates urgency to watch
+   - Includes timestamps
+   - Ends with strong call-to-action
+
+2. hashtags: 20 relevant hashtags (mix of popular and niche)
+
+Reply ONLY with valid JSON:
+{"description":"First line hook that makes them want to watch...\n\nIn this video, you'll discover:\n- Key point 1\n- Key point 2\n- Key point 3\n\nTimestamps:\n0:00 - Introduction\n1:00 - First topic\n2:30 - Main content\n4:00 - Key insight\n5:00 - Conclusion\n\nDon't forget to subscribe and hit the bell!\n\nWhat did you think? Let me know in the comments!","hashtags":["#youtubetips","#contentcreator","#videomarketing","#growing","#tips","#strategy","#engagement","#monetization","#growthhacking","#tutorial","#howto","#learn","#study","#education","#business","#success","#mindset","#motivation","#inspiration","#viral"]}`
+      };
+
+      try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + openaiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              { role: 'system', content: 'You are a professional YouTube content analyst. Reply ONLY with valid JSON. No markdown, no explanations.' },
+              { role: 'user', content: prompts[tool] }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const result = data.choices[0].message.content;
+        const clean = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(clean);
+
+        fullAnalysis[tool] = parsed;
+        renderResult(tool, parsed, body);
+        showToast('Analysis Complete!');
+      } catch (e) {
+        body.innerHTML = '<div class="error-box">Error: ' + e.message + '</div>';
+        showToast('Error', true);
+      }
+    }
+
+    function renderResult(tool, data, body) {
+      if (tool === 'titles') {
+        body.innerHTML = '<ul class="result-list">' +
+          data.map((t, i) => '<li onclick="copyText(this)"><span>' + (i+1) + '</span>' + t + '</li>').join('') +
+        '</ul>';
+      } else if (tool === 'transcript') {
+        body.innerHTML = '<div class="result-text" style="white-space:pre-wrap">' + data.fullScript + '</div>' +
+          '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Main Topics Covered</h4><ul class="result-list">' +
+          data.mainTopics.map(t => '<li>' + t + '</li>').join('') + '</ul>' +
+          '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Key Points Summary</h4><ul class="result-list">' +
+          data.keyPoints.map(p => '<li>' + p + '</li>').join('') + '</ul>';
+      } else if (tool === 'hook') {
+        body.innerHTML = '<div class="result-text"><strong style="color:var(--gold)">Hook Analysis (First 60 Seconds):</strong><br><br>' + data.hookAnalysis + '</div>' +
+          '<h4 style="color:var(--success);margin:1rem 0 0.5rem">Why This Video Went Viral</h4><ul class="result-list">' +
+          data.whyViral.map(r => '<li>' + r + '</li>').join('') + '</ul>' +
+          '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">10 Similar Hooks You Can Use</h4><ul class="result-list">' +
+          data.suggestedHooks.map(h => '<li>' + h + '</li>').join('') + '</ul>';
+      } else if (tool === 'script') {
+        body.innerHTML = '<h4 style="color:var(--gold);margin-bottom:0.5rem">New Hook - Say This First</h4><div class="result-text" style="border-color:var(--gold)">' + data.newHook + '</div>' +
+          '<h4 style="color:var(--purple);margin:1rem 0 0.5rem">Complete Script</h4><div class="result-text" style="white-space:pre-wrap">' + data.newScript + '</div>' +
+          '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Key Moments to Include</h4><ul class="result-list">' +
+          data.keyMoments.map(m => '<li>' + m + '</li>').join('') + '</ul>';
+      } else if (tool === 'desc') {
+        body.innerHTML = '<h4 style="color:var(--purple);margin-bottom:0.5rem">SEO Description</h4><div class="result-text" style="white-space:pre-wrap">' + data.description + '</div>' +
+          '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Hashtags</h4><div class="result-text">' + data.hashtags.join(' ') + '</div>';
+      }
+    }
+
+    function copyText(el) {
+      const text = el.textContent.replace(/^\d+\s*/, '');
+      navigator.clipboard.writeText(text);
+      el.style.background = 'var(--success)';
+      el.style.borderColor = 'var(--success)';
+      setTimeout(() => { el.style.background = 'var(--elevated)'; el.style.borderColor = 'var(--border)'; }, 1500);
+      showToast('Copied!');
+    }
+
+    function copySection(section) {
+      let text = '';
+      if (section === 'transcript' && fullAnalysis.transcript) {
+        text = fullAnalysis.transcript.fullScript;
+      } else if (section === 'hook' && fullAnalysis.hook) {
+        text = 'HOOK ANALYSIS:\n' + fullAnalysis.hook.hookAnalysis + '\n\nWHY VIRAL:\n' + fullAnalysis.hook.whyViral.join('\n') + '\n\n10 SIMILAR HOOKS:\n' + fullAnalysis.hook.suggestedHooks.join('\n');
+      } else if (section === 'script' && fullAnalysis.script) {
+        text = 'NEW HOOK:\n' + fullAnalysis.script.newHook + '\n\nCOMPLETE SCRIPT:\n' + fullAnalysis.script.newScript + '\n\nKEY MOMENTS:\n' + fullAnalysis.script.keyMoments.join('\n');
+      } else if (section === 'titles' && fullAnalysis.titles) {
+        text = fullAnalysis.titles.join('\n');
+      } else if (section === 'desc' && fullAnalysis.desc) {
+        text = fullAnalysis.desc.description + '\n\n' + fullAnalysis.desc.hashtags.join(' ');
+      }
+      navigator.clipboard.writeText(text);
+      const btn = document.querySelector(`#${section}Area .copy-btn`);
+      btn.classList.add('copied');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = btn.textContent.replace('Copied!', 'Copy'); }, 1500);
+      showToast('Copied All!');
+    }
+
+    function showToast(msg, err) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.style.borderColor = err ? '#FF4757' : 'var(--success)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+
+<script>
+/**
+ * Iframe 元素高亮注入脚本
+ * 需要在目标网站中引入此脚本来支持跨域 iframe 高亮功能
+ *
+ * 使用方法：
+ * 1. 将此脚本添加到目标网站的 HTML 中
+ * 2. 或通过浏览器扩展、用户脚本等方式注入
+ */
+
+(function () {
+  "use strict";
+
+  // 检查是否在 iframe 中
+  if (window.self === window.top) {
+    return; // 不在 iframe 中，不执行
+  }
+
+  // 检查是否已经初始化过
+  if (window.__iframeHighlightInitialized) {
+    return;
+  }
+  window.__iframeHighlightInitialized = true;
+  console.log("Iframe 高亮脚本已加载");
+
+  // 创建高亮覆盖层
+  var overlay = document.createElement("div");
+  overlay.id = "iframe-highlight-overlay";
+  overlay.style.cssText = "\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100vw;\n    height: 100vh;\n    pointer-events: none;\n    z-index: 999999;\n    overflow: hidden;\n  ";
+
+  // 创建悬停高亮框（虚线边框）
+  var highlightBox = document.createElement("div");
+  highlightBox.id = "iframe-highlight-box";
+  highlightBox.style.cssText = "\n    position: absolute;\n    border: 2px dashed #007AFF;\n    background: rgba(0, 122, 255, 0.08);\n    pointer-events: none;\n    display: none;\n    transition: all 0.1s ease;\n    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);\n    border-radius: 2px;\n  ";
+
+  // 创建选中节点的常驻高亮框（实线边框）
+  var selectedBox = document.createElement("div");
+  selectedBox.id = "iframe-selected-box";
+  selectedBox.style.cssText = "\n    position: absolute;\n    border: 2px solid #007AFF;\n    pointer-events: none;\n    display: none;\n    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 107, 53, 0.4);\n    border-radius: 2px;\n    z-index: 1000000;\n  ";
+
+  // 创建悬停标签显示
+  var tagLabel = document.createElement("div");
+  tagLabel.id = "iframe-tag-label";
+  tagLabel.style.cssText = "\n    position: absolute;\n    background: #007AFF;\n    color: white;\n    padding: 2px 6px;\n    font-size: 11px;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n    border-radius: 2px;\n    pointer-events: none;\n    display: none;\n    white-space: nowrap;\n    z-index: 1000001;\n    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);\n    font-weight: 500;\n  ";
+
+  // 创建选中节点标签
+  var selectedLabel = document.createElement("div");
+  selectedLabel.id = "iframe-selected-label";
+  selectedLabel.style.cssText = "\n    position: absolute;\n    background: #007AFF;\n    color: white;\n    padding: 3px 8px;\n    font-size: 11px;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n    border-radius: 3px;\n    pointer-events: none;\n    display: none;\n    white-space: nowrap;\n    z-index: 1000002;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);\n    font-weight: 600;\n  ";
+  overlay.appendChild(highlightBox);
+  overlay.appendChild(selectedBox);
+  overlay.appendChild(tagLabel);
+  overlay.appendChild(selectedLabel);
+  document.body.appendChild(overlay);
+
+  // 存储当前选中的元素
+  var selectedElement = null;
+  var highlightEnabled = false;
+
+  // 更新选中元素的高亮显示
+  function updateSelectedHighlight(element) {
+    console.log("updateSelectedHighlight called with:", element);
+    if (!element) {
+      selectedBox.style.display = "none";
+      selectedLabel.style.display = "none";
+      selectedElement = null;
+      console.log("Cleared selected highlight");
+      return;
+    }
+    selectedElement = element;
+    var rect = element.getBoundingClientRect();
+    console.log("Selected element rect:", rect);
+
+    // 更新选中高亮框位置
+    selectedBox.style.display = "block";
+    selectedBox.style.left = "".concat(rect.left - 2, "px");
+    selectedBox.style.top = "".concat(rect.top - 2, "px");
+    selectedBox.style.width = "".concat(rect.width + 4, "px");
+    selectedBox.style.height = "".concat(rect.height + 4, "px");
+
+    // 更新选中标签位置和内容
+    selectedLabel.style.display = "block";
+    selectedLabel.textContent = "\u2713 <".concat(element.tagName.toLowerCase(), ">");
+
+    // 计算标签位置，确保不超出视窗
+    var labelTop = rect.top - 28;
+    var labelLeft = rect.left;
+
+    // 如果标签会超出顶部，显示在元素下方
+    if (labelTop < 5) {
+      labelTop = rect.bottom + 5;
+    }
+
+    // 如果标签会超出右侧，向左调整
+    var labelWidth = selectedLabel.offsetWidth || 100; // 预估宽度
+    if (labelLeft + labelWidth > window.innerWidth - 10) {
+      labelLeft = window.innerWidth - labelWidth - 10;
+    }
+    selectedLabel.style.left = "".concat(Math.max(5, labelLeft), "px");
+    selectedLabel.style.top = "".concat(labelTop, "px");
+    console.log("Selected highlight positioned at:", {
+      left: selectedBox.style.left,
+      top: selectedBox.style.top,
+      width: selectedBox.style.width,
+      height: selectedBox.style.height
+    });
+  }
+  function getElementSelector(element) {
+    if (!(element instanceof Element)) throw new Error('Argument must be a DOM element');
+    var segments = [];
+    var current = element;
+    while (current !== document.documentElement) {
+      var selector = '';
+      // 优先检查唯一ID
+      if (current.id && document.querySelectorAll("#".concat(current.id)).length === 1) {
+        segments.unshift("#".concat(current.id));
+        break; // ID唯一，无需继续向上
+      }
+
+      // 生成类名选择器（取第一个有效类名）
+      var classes = Array.from(current.classList).filter(function (c) {
+        return !c.startsWith('js-');
+      });
+      var className = classes.length > 0 ? ".".concat(classes[0]) : '';
+
+      // 生成位置索引（nth-child）
+      var tag = current.tagName.toLowerCase();
+      if (!className) {
+        var siblings = Array.from(current.parentNode.children);
+        var index = siblings.findIndex(function (el) {
+          return el === current;
+        }) + 1;
+        selector = "".concat(tag, ":nth-child(").concat(index, ")");
+      } else {
+        selector = className;
+      }
+      segments.unshift(selector);
+      current = current.parentElement;
+    }
+
+    // 处理根元素
+    if (current === document.documentElement) {
+      segments.unshift('html');
+    }
+    return segments.join(' > ');
+  }
+
+  // 获取元素文本内容
+  function getElementText(element) {
+    var _element$textContent;
+    if (element.tagName === "INPUT") {
+      return element.value || element.placeholder || "";
+    }
+    if (element.tagName === "TEXTAREA") {
+      return element.value || element.placeholder || "";
+    }
+    var text = ((_element$textContent = element.textContent) === null || _element$textContent === void 0 ? void 0 : _element$textContent.trim()) || "";
+    return text.length > 50 ? text.substring(0, 50) + "..." : text;
+  }
+
+  // 获取元素属性信息
+  function getElementAttributes(element) {
+    var attrs = {};
+    for (var i = 0; i < element.attributes.length; i++) {
+      var attr = element.attributes[i];
+      attrs[attr.name] = attr.value;
+    }
+    return attrs;
+  }
+
+  // 鼠标悬停事件处理
+  function handleMouseOver(e) {
+    if (!highlightEnabled) return;
+    var target = e.target;
+    if (!target || target === overlay || target === highlightBox || target === tagLabel || target === selectedBox || target === selectedLabel) {
+      return;
+    }
+
+    // 避免高亮 html 和 body 元素
+    if (target === document.documentElement || target === document.body) {
+      return;
+    }
+
+    // 如果是已选中的元素，不显示悬停高亮
+    if (target === selectedElement) {
+      highlightBox.style.display = "none";
+      tagLabel.style.display = "none";
+      return;
+    }
+    var rect = target.getBoundingClientRect();
+    var selector = getElementSelector(target);
+    var text = getElementText(target);
+    var attributes = getElementAttributes(target);
+
+    // 更新悬停高亮框位置
+    highlightBox.style.display = "block";
+    highlightBox.style.left = "".concat(rect.left - 2, "px");
+    highlightBox.style.top = "".concat(rect.top - 2, "px");
+    highlightBox.style.width = "".concat(rect.width + 4, "px");
+    highlightBox.style.height = "".concat(rect.height + 4, "px");
+
+    // 更新标签位置和内容
+    tagLabel.style.display = "block";
+    tagLabel.textContent = "<".concat(target.tagName.toLowerCase(), ">");
+
+    // 计算标签位置，确保不超出视窗
+    var labelTop = rect.top - 22;
+    var labelLeft = rect.left;
+
+    // 如果标签会超出顶部，显示在元素下方
+    if (labelTop < 0) {
+      labelTop = rect.bottom + 5;
+    }
+
+    // 如果标签会超出右侧，向左调整
+    if (labelLeft + tagLabel.offsetWidth > window.innerWidth) {
+      labelLeft = window.innerWidth - tagLabel.offsetWidth - 5;
+    }
+    tagLabel.style.left = "".concat(Math.max(0, labelLeft), "px");
+    tagLabel.style.top = "".concat(labelTop, "px");
+
+    // 发送消息到父窗口
+    var elementInfo = {
+      tagName: target.tagName.toLowerCase(),
+      rect: {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+      },
+      selector: selector,
+      text: text,
+      attributes: attributes,
+      url: window.location.href,
+      path: window.location.pathname,
+      timestamp: Date.now()
+    };
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-hover",
+        data: elementInfo,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 鼠标离开事件处理
+  function handleMouseOut(e) {
+    if (!highlightEnabled) return;
+    var relatedTarget = e.relatedTarget;
+
+    // 如果鼠标移动到高亮相关元素上，不隐藏高亮
+    if (relatedTarget && (relatedTarget === highlightBox || relatedTarget === tagLabel || relatedTarget === overlay || relatedTarget === selectedBox || relatedTarget === selectedLabel)) {
+      return;
+    }
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-hover",
+        data: null,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 点击事件处理
+  function handleClick(e) {
+    var target = e.target;
+    if (!target || target === overlay || target === highlightBox || target === tagLabel || target === selectedBox || target === selectedLabel) {
+      return;
+    }
+
+    // 避免处理 html 和 body 元素
+    if (target === document.documentElement || target === document.body) {
+      return;
+    }
+
+    // 检查是否是交互元素，这些元素需要保留默认行为
+    var isInteractiveElement = ['input', 'textarea', 'select', 'button', 'a'].includes(target.tagName.toLowerCase());
+
+    // 如果高亮功能启用，对于非交互元素阻止默认行为和事件传播
+    if (highlightEnabled) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    var rect = target.getBoundingClientRect();
+    var selector = getElementSelector(target);
+    var text = getElementText(target);
+    var attributes = getElementAttributes(target);
+    console.log("Element clicked:", {
+      tagName: target.tagName,
+      selector: selector,
+      rect: rect
+    });
+
+    // 立即更新选中高亮
+    updateSelectedHighlight(target);
+
+    // 隐藏悬停高亮，因为现在是选中状态
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    var elementInfo = {
+      tagName: target.tagName.toLowerCase(),
+      rect: {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+      },
+      selector: selector,
+      text: text,
+      attributes: attributes,
+      url: window.location.href,
+      path: window.location.pathname,
+      timestamp: Date.now()
+    };
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-click",
+        data: elementInfo,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 监听来自父窗口的消息
+  function handleParentMessage(event) {
+    console.log("Received message from parent:", event.data);
+    if (event.data.type === "iframe-highlight-toggle") {
+      var enabled = event.data.enabled;
+      console.log("Highlight toggle:", enabled);
+      if (enabled) {
+        enableHighlight();
+      } else {
+        disableHighlight();
+      }
+    } else if (event.data.type === "enable-iframe-highlight") {
+      console.log("Enable iframe highlight");
+      enableHighlight();
+    } else if (event.data.type === "disable-iframe-highlight") {
+      console.log("Disable iframe highlight");
+      disableHighlight();
+    } else if (event.data.type === "toggle-iframe-highlight") {
+      var _enabled = event.data.enabled !== undefined ? event.data.enabled : !highlightEnabled;
+      console.log("Toggle iframe highlight to:", _enabled);
+      if (_enabled) {
+        enableHighlight();
+      } else {
+        disableHighlight();
+      }
+    } else if (event.data.type === "update-selected-element") {
+      var selector = event.data.selector;
+      console.log("Update selected element with selector:", selector);
+      if (selector) {
+        try {
+          var element = document.querySelector(selector);
+          console.log("Found element by selector:", element);
+          updateSelectedHighlight(element);
+        } catch (error) {
+          console.warn("Failed to select element:", error);
+          updateSelectedHighlight(null);
+        }
+      } else {
+        updateSelectedHighlight(null);
+      }
+    } else if (event.data.type === "clear-selected-element") {
+      console.log("Clear selected element");
+      updateSelectedHighlight(null);
+    }
+  }
+
+  // 启用高亮功能
+  function enableHighlight() {
+    console.log("Enabling highlight");
+    document.addEventListener("mouseover", handleMouseOver, true);
+    document.addEventListener("mouseout", handleMouseOut, true);
+    document.addEventListener("click", handleClick, true);
+    highlightEnabled = true;
+    overlay.style.display = "block";
+  }
+
+  // 禁用高亮功能
+  function disableHighlight() {
+    console.log("Disabling highlight");
+    highlightEnabled = false;
+    // 保持事件监听器，但通过 highlightEnabled 变量控制行为
+    // 这样可以保留选中状态的显示
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    // 不隐藏 selectedBox 和 selectedLabel，保留选中状态
+  }
+
+  // 完全禁用高亮功能（移除所有监听器）
+  function fullyDisableHighlight() {
+    console.log("Fully disabling highlight");
+    highlightEnabled = false;
+    document.removeEventListener("mouseover", handleMouseOver, true);
+    document.removeEventListener("mouseout", handleMouseOut, true);
+    document.removeEventListener("click", handleClick, true);
+    overlay.style.display = "none";
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    selectedBox.style.display = "none";
+    selectedLabel.style.display = "none";
+  }
+
+  // 添加事件监听
+  enableHighlight();
+  window.addEventListener("message", handleParentMessage);
+
+  // 暴露全局函数供外部调用
+  window.__iframeHighlightControl = {
+    enable: enableHighlight,
+    disable: disableHighlight,
+    fullyDisable: fullyDisableHighlight,
+    isEnabled: function isEnabled() {
+      return highlightEnabled;
+    },
+    getSelectedElement: function getSelectedElement() {
+      return selectedElement;
+    },
+    updateSelected: updateSelectedHighlight,
+    // 通过消息发送开关控制
+    sendToggleMessage: function sendToggleMessage(enabled) {
+      window.parent.postMessage({
+        type: 'iframe-highlight-status',
+        enabled: enabled || highlightEnabled,
+        source: 'iframe-highlight-injector'
+      }, '*');
+    }
+  };
+
+  // 通知父窗口脚本已加载
+  try {
+    window.parent.postMessage({
+      type: "iframe-highlight-ready",
+      data: {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        timestamp: Date.now()
+      },
+      source: "iframe-highlight-injector"
+    }, "*");
+  } catch (error) {
+    console.warn("无法发送就绪消息到父窗口:", error);
+  }
+
+  // 清理函数
+  window.__iframeHighlightCleanup = function () {
+    fullyDisableHighlight();
+    window.removeEventListener("message", handleParentMessage);
+    if (overlay.parentElement) {
+      overlay.parentElement.removeChild(overlay);
+    }
+    delete window.__iframeHighlightInitialized;
+    delete window.__iframeHighlightCleanup;
+  };
+})();
+
+</script>
+<style>
+#minimax-floating-ball {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 12px;
+  background: #222222;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  color: #F8F8F8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  z-index: 9999;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#minimax-floating-ball:hover {
+  transform: translateY(-2px);
+  background: #383838;
+}
+.minimax-ball-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.minimax-logo-wave {
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg%20preserveAspectRatio%3D%27none%27%20width%3D%27100%25%27%20height%3D%27100%25%27%20overflow%3D%27visible%27%20style%3D%27display%3A%20block%3B%27%20viewBox%3D%270%200%20170.136%20138.225%27%20fill%3D%27none%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%3E%3Cg%20id%3D%27Frame%202116748449%27%3E%3Cpath%20id%3D%27Subtract%27%20d%3D%27M170%20101.783C170%20105.144%20168.49%20108.327%20165.886%20110.453L134.963%20135.702C132.964%20137.334%20130.463%20138.225%20127.883%20138.225H10.4938C4.69824%20138.225%200%20133.527%200%20127.732V39.2289C0%2035.8597%201.51758%2032.6698%204.13162%2030.5442L38.5402%202.56547C40.536%200.942662%2043.0298%200.0567377%2045.602%200.0567377H159.506C165.302%200.0567377%20170%204.75498%20170%2010.5506V101.783Z%27%20fill%3D%27black%27%20style%3D%27fill%3Ablack%3Bfill-opacity%3A1%3B%27/%3E%3Cpath%20id%3D%27Subtract_2%27%20d%3D%27M149.011%2094.4632C149.011%2096.1471%20148.253%2097.7415%20146.946%2098.8043L125.893%20115.936C124.895%20116.748%20123.648%20117.191%20122.361%20117.191H24.6479C22.716%20117.191%2021.15%20115.625%2021.15%20113.693V46.1166C21.15%2044.4267%2021.9135%2042.8274%2023.2274%2041.7648L47.367%2022.2437C48.3638%2021.4376%2049.607%2020.9982%2050.8888%2020.9988L145.514%2021.0427C147.446%2021.0436%20149.011%2022.6094%20149.011%2024.5406V94.4632Z%27%20fill%3D%27white%27%20style%3D%27fill%3Awhite%3Bfill-opacity%3A1%3B%27/%3E%3Cpath%20id%3D%27Rectangle%20111142564%27%20d%3D%27M42.111%2080.8025C42.111%2077.7115%2044.6167%2075.2057%2047.7077%2075.2057H60.9999C64.0908%2075.2057%2066.5966%2077.7115%2066.5966%2080.8025V121.029H42.111V80.8025Z%27%20fill%3D%27black%27%20style%3D%27fill%3Ablack%3Bfill-opacity%3A1%3B%27/%3E%3Cpath%20id%3D%27Rectangle%20111142567%27%20d%3D%27M79.1894%2080.8025C79.1894%2077.7115%2081.6952%2075.2057%2084.7861%2075.2057H98.0783C101.169%2075.2057%20103.675%2077.7115%20103.675%2080.8025V121.029H79.1894V80.8025Z%27%20fill%3D%27black%27%20style%3D%27fill%3Ablack%3Bfill-opacity%3A1%3B%27/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px 11px;
+  background-color: #8FD1FF;
+  border-radius: 4px;
+}
+
+.minimax-ball-text {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.minimax-close-icon {
+  margin-left: 8px;
+  font-size: 16px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.minimax-close-icon:hover {
+  opacity: 1;
+}
+</style>
+<div id="minimax-floating-ball">
+  <div class="minimax-ball-content">
+    <div class="minimax-logo-wave"></div>
+    <span class="minimax-ball-text">Created by MiniMax Agent</span>
+  </div>
+  <div class="minimax-close-icon">×</div>
+</div>
+<script>
+// Initialize floating ball functionality
+function initFloatingBall() {
+  const ball = document.getElementById('minimax-floating-ball');
+  if (!ball) return;
+
+  // Initial animation
+  ball.style.opacity = '0';
+  ball.style.transform = 'translateY(20px)';
+
+  setTimeout(() => {
+    ball.style.opacity = '1';
+    ball.style.transform = 'translateY(0)';
+  }, 500);
+
+  // Handle logo click
+  const ballContent = ball.querySelector('.minimax-ball-content');
+  ballContent.addEventListener('click', function (e) {
+    e.stopPropagation();
+    window.open('https://agent.minimax.io/', '_blank');
+    ball.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      ball.style.transform = 'scale(1)';
+    }, 100);
+  });
+
+  // Handle close button click
+  const closeIcon = ball.querySelector('.minimax-close-icon');
+  closeIcon.addEventListener('click', function (e) {
+    e.stopPropagation();
+    ball.style.opacity = '0';
+    ball.style.transform = 'translateY(20px)';
+
+    setTimeout(() => {
+      ball.style.display = 'none';
+    }, 300);
+  });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initFloatingBall); 
+</script>
+</body>
