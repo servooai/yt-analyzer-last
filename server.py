@@ -103,10 +103,27 @@ def get_transcript(video_id):
         })
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read())
+            
+            # Handle array response
+            if isinstance(data, list):
+                # Try to find English transcript first
+                for item in data:
+                    if item.get('lang', '').startswith('en'):
+                        text = item.get('text', '')
+                        if text:
+                            return text
+                # If no English, return first available
+                if data:
+                    return data[0].get('text', '')
+            
+            # Handle object response
             if data.get('content'):
                 return data['content']
             elif data.get('text'):
                 return data['text']
+            elif isinstance(data, dict) and 'transcript' in data:
+                return data['transcript']
+                
     except Exception as e:
         print(f"Supadata error: {type(e).__name__}: {e}")
     
