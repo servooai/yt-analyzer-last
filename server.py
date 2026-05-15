@@ -89,13 +89,10 @@ def get_video_stats(video_id):
         return None
 
 def get_transcript(video_id):
-    """
-    Get YouTube transcript using youtube-transcript-api
-    """
+    """Get YouTube transcript using youtube-transcript-api"""
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
         
-        # 使用旧方法 (兼容旧版本)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         lines = []
         for entry in transcript:
@@ -124,6 +121,31 @@ def health():
         'ai': bool(client),
         'google': bool(GOOGLE_API_KEY)
     })
+
+@app.route('/debug-transcript', methods=['GET'])
+def debug_transcript():
+    """Debug transcript extraction"""
+    video_id = 'dQw4w9WgXcQ'
+    results = {}
+    
+    try:
+        import youtube_transcript_api
+        results['library_version'] = youtube_transcript_api.__version__
+        results['library_installed'] = True
+    except ImportError as e:
+        results['library_installed'] = False
+        results['import_error'] = str(e)
+        return jsonify(results)
+    
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        results['old_method'] = f'SUCCESS - {len(transcript)} entries'
+        results['sample'] = transcript[0] if transcript else None
+    except Exception as e:
+        results['old_method'] = f'FAILED: {type(e).__name__}: {str(e)}'
+    
+    return jsonify(results)
 
 @app.route('/video', methods=['GET'])
 def video():
@@ -195,7 +217,7 @@ VIDEO TRANSCRIPT:
 
 RULES:
 - If NO transcript: Be honest about it
-- NEVER use placeholder text like "topic 1", "point 1"
+- NEVER use placeholder text
 - Return valid JSON only
 
 JSON:
