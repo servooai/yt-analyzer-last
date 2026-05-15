@@ -257,40 +257,43 @@
       btn.disabled = false;
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyze';
     }
+// ================================
+//  TRANSCRIPT - Gets REAL transcript from YouTube (no AI)
+// ================================
+async function loadTranscript() {
+  if (!currentVideo) { showToast('Analyze video first', true); return; }
 
-    // ================================
-    //  TRANSCRIPT - Gets REAL transcript from YouTube (no AI)
-    // ================================
-    async function loadTranscript() {
-      if (!currentVideo) { showToast('Analyze video first', true); return; }
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  document.querySelector('.tool-card.transcript').classList.add('active');
+  document.querySelectorAll('.content-area').forEach(a => a.classList.remove('show'));
+  document.getElementById('transcriptArea').classList.add('show');
+  document.getElementById('transcriptArea').scrollIntoView({ behavior: 'smooth' });
 
-      document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
-      document.querySelector('.tool-card.transcript').classList.add('active');
-      document.querySelectorAll('.content-area').forEach(a => a.classList.remove('show'));
-      document.getElementById('transcriptArea').classList.add('show');
-      document.getElementById('transcriptArea').scrollIntoView({ behavior: 'smooth' });
+  const body = document.getElementById('transcriptBody');
+  body.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Fetching REAL transcript from YouTube...</div>';
 
-      const body = document.getElementById('transcriptBody');
-      body.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Fetching REAL transcript from YouTube...</div>';
+  try {
+    const res = await fetch(BACKEND_URL + '/transcript?video_id=' + currentVideo.id, { timeout: 30000 });
+    const data = await res.json();
 
-      try {
-        const res = await fetch(BACKEND_URL + '/transcript?video_id=' + currentVideo.id, { timeout: 30000 });
-        const data = await res.json();
-
-        if (res.ok && data.success && data.transcript) {
-          realTranscript = data.transcript;
-          body.innerHTML = '<div class="result-text" style="max-height:none">' + realTranscript + '</div>';
-          showToast('Real transcript loaded!');
-        } else {
-          body.innerHTML = '<div class="error-box">' + (data.error || 'No transcript available for this video') + '</div>';
-          realTranscript = '';
-        }
-      } catch (e) {
-        body.innerHTML = '<div class="error-box">Failed to fetch transcript: ' + e.message + '</div>';
-        realTranscript = '';
+    if (res.ok && data.success && data.transcript) {
+      // Handle array response - join all text entries
+      if (Array.isArray(data.transcript)) {
+        realTranscript = data.transcript.map(item => item.text).join(' ');
+      } else {
+        realTranscript = data.transcript;
       }
+      body.innerHTML = '<div class="result-text" style="max-height:none">' + realTranscript + '</div>';
+      showToast('Real transcript loaded!');
+    } else {
+      body.innerHTML = '<div class="error-box">' + (data.error || 'No transcript available for this video') + '</div>';
+      realTranscript = '';
     }
-
+  } catch (e) {
+    body.innerHTML = '<div class="error-box">Failed to fetch transcript: ' + e.message + '</div>';
+    realTranscript = '';
+  }
+}
     // ================================
     //  AI TOOLS - Use AI to analyze
     // ================================
