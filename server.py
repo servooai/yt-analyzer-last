@@ -7,8 +7,6 @@ import os
 import re
 import json
 import urllib.request
-import urllib.error
-import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -92,78 +90,27 @@ def get_video_stats(video_id):
 
 def get_transcript(video_id):
     """
-    Get YouTube transcript using multiple methods.
-    Railway allows connections to YouTube unlike Render.
+    Get YouTube transcript using youtube-transcript-api
     """
-    
-    # METHOD 1: Direct YouTube subtitle download
-    try:
-        for lang in ['en', 'en-US', 'en-GB']:
-            try:
-                url = f"https://www.youtube.com/api/timedtext?v={video_id}&lang={lang}"
-                req = urllib.request.Request(url, headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                    'Accept': '*/*'
-                })
-                with urllib.request.urlopen(req, timeout=10) as resp:
-                    content = resp.read()
-                    if content and len(content) > 100:
-                        decoded = content.decode('utf-8', errors='ignore')
-                        if '<?xml' in decoded or '<tt' in decoded or '<text' in decoded:
-                            texts = re.findall(r'<text[^>]*>([^<]+)</text>', decoded)
-                            if texts:
-                                lines = []
-                                for text in texts:
-                                    text = text.replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('&lt;', '<').replace('&gt;', '>')
-                                    if text.strip():
-                                        lines.append(text.strip())
-                                if lines:
-                                    return '\n'.join(lines)
-                        return decoded
-            except:
-                continue
-    except Exception as e:
-        print(f"Method 1 failed: {e}")
-    
-    # METHOD 2: youtube-transcript-api
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
-        from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
         
-        try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # 使用旧方法 (兼容旧版本)
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        lines = []
+        for entry in transcript:
+            mins = int(entry['start']) // 60
+            secs = int(entry['start']) % 60
+            text = entry['text'].replace('\n', ' ').strip()
+            if text:
+                lines.append(f"[{mins:02d}:{secs:02d}] {text}")
+        if lines:
+            return '\n'.join(lines)
             
-            for transcript in transcript_list:
-                if transcript.language_code.startswith('en'):
-                    data = transcript.fetch()
-                    lines = []
-                    for entry in data:
-                        mins = int(entry.start) // 60
-                        secs = int(entry.start) % 60
-                        text = entry.text.replace('\n', ' ').strip()
-                        if text:
-                            lines.append(f"[{mins:02d}:{secs:02d}] {text}")
-                    if lines:
-                        return '\n'.join(lines)
-        except:
-            pass
-        
-        try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
-            lines = []
-            for entry in transcript:
-                mins = int(entry['start']) // 60
-                secs = int(entry['start']) % 60
-                text = entry['text'].replace('\n', ' ').strip()
-                if text:
-                    lines.append(f"[{mins:02d}:{secs:02d}] {text}")
-            if lines:
-                return '\n'.join(lines)
-        except:
-            pass
-            
+    except ImportError:
+        print("youtube_transcript_api not installed")
     except Exception as e:
-        print(f"Method 2 error: {type(e).__name__}: {e}")
+        print(f"Transcript error: {type(e).__name__}: {e}")
     
     return None
 
@@ -177,41 +124,6 @@ def health():
         'ai': bool(client),
         'google': bool(GOOGLE_API_KEY)
     })
-
-@app.route('/debug-network', methods=['GET'])
-def debug_network():
-    """Test network connectivity to YouTube"""
-    results = {}
-    
-    # Test 1: YouTube oembed
-    try:
-        url = "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&format=json"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            results['oembed'] = 'SUCCESS'
-    except Exception as e:
-        results['oembed'] = f'FAILED: {str(e)}'
-    
-    # Test 2: YouTube transcript endpoint
-    try:
-        url = "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&lang=en"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            content = resp.read()
-            results['timedtext'] = f'SUCCESS - {len(content)} bytes'
-    except Exception as e:
-        results['timedtext'] = f'FAILED: {str(e)}'
-    
-    # Test 3: youtube-transcript-api
-    try:
-        from youtube_transcript_api import YouTubeTranscriptApi
-        transcripts = YouTubeTranscriptApi.list_transcripts('dQw4w9WgXcQ')
-        results['transcript_api'] = 'SUCCESS - found transcripts'
-        results['available'] = [str(t) for t in transcripts]
-    except Exception as e:
-        results['transcript_api'] = f'FAILED: {type(e).__name__}: {str(e)}'
-    
-    return jsonify(results)
 
 @app.route('/video', methods=['GET'])
 def video():
