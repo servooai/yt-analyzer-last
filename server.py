@@ -1,5 +1,6 @@
 """
 YouTube AI Analyzer - Backend Server
+Designed for Railway deployment
 """
 
 import os
@@ -92,22 +93,14 @@ def get_video_stats(video_id):
 def get_transcript(video_id):
     """
     Get YouTube transcript using multiple methods.
-    Method 1: Direct YouTube transcript download
-    Method 2: youtube-transcript-api
+    Railway allows connections to YouTube unlike Render.
     """
     
     # ============================================
     #  METHOD 1: Direct YouTube subtitle download
     # ============================================
     try:
-        # YouTube provides subtitles via this endpoint
-        subtitle_urls = [
-            # Try English auto-generated
-            f"https://youtubetranscript.com/watch?v={video_id}",
-        ]
-        
-        # Try to download directly from YouTube
-        for lang in ['en', 'en-US']:
+        for lang in ['en', 'en-US', 'en-GB']:
             try:
                 url = f"https://www.youtube.com/api/timedtext?v={video_id}&lang={lang}"
                 req = urllib.request.Request(url, headers={
@@ -118,22 +111,18 @@ def get_transcript(video_id):
                     content = resp.read()
                     if content and len(content) > 100:
                         decoded = content.decode('utf-8', errors='ignore')
-                        # Parse TTML/XML format
-                        texts = re.findall(r'<text[^>]*>([^<]+)</text>', decoded)
-                        if texts:
-                            lines = []
-                            # Get timing from attributes
-                            text_tags = re.finditer(r'<text[^>]*>([^<]+)</text>', decoded)
-                            for match in text_tags:
-                                text = match.group(1)
-                                text = text.replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('&lt;', '<').replace('&gt;', '>')
-                                if text.strip():
-                                    lines.append(text.strip())
-                            if lines:
-                                return '\n'.join(lines)
-                        # If XML parsing failed, return raw content
-                        if '<?xml' in decoded or '<tt' in decoded:
-                            return decoded
+                        if '<?xml' in decoded or '<tt' in decoded or '<text' in decoded:
+                            # Parse TTML/XML format
+                            texts = re.findall(r'<text[^>]*>([^<]+)</text>', decoded)
+                            if texts:
+                                lines = []
+                                for text in texts:
+                                    text = text.replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('&lt;', '<').replace('&gt;', '>')
+                                    if text.strip():
+                                        lines.append(text.strip())
+                                if lines:
+                                    return '\n'.join(lines)
+                        return decoded
             except Exception as e:
                 print(f"Lang {lang} failed: {e}")
                 continue
@@ -141,13 +130,11 @@ def get_transcript(video_id):
         print(f"Method 1 failed: {e}")
     
     # ============================================
-    #  METHOD 2: youtube-transcript-api (fallback)
+    #  METHOD 2: youtube-transcript-api
     # ============================================
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
-        from youtube_transcript_api._errors import (
-            TranscriptsDisabled, NoTranscriptFound
-        )
+        from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
         
         # Try list_transcripts first
         try:
@@ -238,7 +225,7 @@ def transcript():
 
     return jsonify({
         'success': False, 
-        'error': 'No transcript available for this video. This video may not have captions or YouTube is blocking the request from the server.'
+        'error': 'No transcript available for this video. This video may not have captions.'
     }), 404
 
 @app.route('/analyze', methods=['POST'])
@@ -252,7 +239,6 @@ def analyze():
     channel = data.get('channel', '') or data.get('video_channel', '')
     views = data.get('views', 0) or data.get('video_views', 0)
     transcript = data.get('transcript', '')[:4000]
-    video_id = data.get('video_id', '')
 
     has_real_transcript = bool(transcript and len(transcript) > 50)
 
@@ -361,6 +347,9 @@ JSON ONLY."""
     except:
         return jsonify({'success': True, 'result': result})
 
+# ============================================
+#  START SERVER
+# ============================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
