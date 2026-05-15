@@ -121,7 +121,7 @@
     </div>
 
     <div class="tools-grid">
-      <div class="tool-card transcript" onclick="showTool('transcript')"><div class="icon">&#128221;</div><h4>Transcript</h4><span>Full Text</span></div>
+      <div class="tool-card transcript" onclick="loadTranscript()"><div class="icon">&#128221;</div><h4>Transcript</h4><span>Full Text</span></div>
       <div class="tool-card hook" onclick="showTool('hook')"><div class="icon">&#9889;</div><h4>Hook Analysis</h4><span>First Minute</span></div>
       <div class="tool-card script" onclick="showTool('script')"><div class="icon">&#9998;</div><h4>Similar Script</h4><span>Generate</span></div>
       <div class="tool-card titles" onclick="showTool('titles')"><div class="icon">&#128279;</div><h4>10 Titles</h4><span>SEO</span></div>
@@ -129,23 +129,23 @@
     </div>
 
     <div id="transcriptArea" class="content-area">
-      <div class="content-header"><h3>Full Video Transcript</h3><button class="copy-btn" onclick="copySection('transcript')">Copy</button></div>
+      <div class="content-header"><h3>Full Video Transcript (REAL)</h3><button class="copy-btn" onclick="copySection('transcript')">Copy</button></div>
       <div id="transcriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Transcript" to load</div></div>
     </div>
     <div id="hookArea" class="content-area">
-      <div class="content-header"><h3>Hook Analysis</h3><button class="copy-btn" onclick="copySection('hook')">Copy All</button></div>
+      <div class="content-header"><h3>Hook Analysis (AI)</h3><button class="copy-btn" onclick="copySection('hook')">Copy All</button></div>
       <div id="hookBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Hook Analysis"</div></div>
     </div>
     <div id="scriptArea" class="content-area">
-      <div class="content-header"><h3>Similar Script</h3><button class="copy-btn" onclick="copySection('script')">Copy</button></div>
+      <div class="content-header"><h3>Similar Script (AI)</h3><button class="copy-btn" onclick="copySection('script')">Copy</button></div>
       <div id="scriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Similar Script"</div></div>
     </div>
     <div id="titlesArea" class="content-area">
-      <div class="content-header"><h3>10 Suggested Titles</h3><button class="copy-btn" onclick="copySection('titles')">Copy All</button></div>
+      <div class="content-header"><h3>10 Suggested Titles (AI)</h3><button class="copy-btn" onclick="copySection('titles')">Copy All</button></div>
       <div id="titlesBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "10 Titles"</div></div>
     </div>
     <div id="descArea" class="content-area">
-      <div class="content-header"><h3>Description + Hashtags</h3><button class="copy-btn" onclick="copySection('desc')">Copy</button></div>
+      <div class="content-header"><h3>Description + Hashtags (AI)</h3><button class="copy-btn" onclick="copySection('desc')">Copy</button></div>
       <div id="descBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Description"</div></div>
     </div>
   </div>
@@ -153,10 +153,14 @@
   <div class="toast" id="toast"><span id="toastMsg">Done!</span></div>
 
   <script>
+    // ================================
+    //  IMPORTANT: Change this to your backend URL
+    // ================================
     const BACKEND_URL = 'https://yt-analyzer-last.onrender.com';
 
     let currentVideo = null;
     let fullAnalysis = {};
+    let realTranscript = '';
 
     function extractId(url) {
       const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
@@ -208,7 +212,6 @@
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Analyzing...';
 
       try {
-        // Get video data from backend
         const vres = await fetch(BACKEND_URL + '/video?video_id=' + id, { timeout: 10000 });
         const vdata = await vres.json();
 
@@ -232,17 +235,6 @@
           engagement: views > 0 ? ((likes + comments) / views * 100).toFixed(2) : 0
         };
 
-        // Get transcript
-        let transcript = '';
-        try {
-          const tres = await fetch(BACKEND_URL + '/transcript?video_id=' + id, { timeout: 15000 });
-          if (tres.ok) {
-            const tdata = await tres.json();
-            if (tdata.success && tdata.transcript) transcript = tdata.transcript;
-          }
-        } catch {}
-        currentVideo.transcript = transcript;
-
         // Update UI
         document.getElementById('vThumb').src = currentVideo.thumb;
         document.getElementById('vTitle').textContent = currentVideo.title;
@@ -253,7 +245,11 @@
         document.getElementById('sEngagement').textContent = currentVideo.engagement + '%';
         document.getElementById('videoInfo').classList.add('show');
 
-        showToast(transcript ? 'Video + Transcript loaded' : 'Video loaded');
+        // Reset transcript
+        realTranscript = '';
+        document.getElementById('transcriptBody').innerHTML = '<div class="loading-state">Click "Transcript" to load the real video transcript</div>';
+
+        showToast(vdata.hasStats ? 'Video + Stats loaded' : 'Video loaded (no stats)');
       } catch (e) {
         showToast(e.message || 'Error', true);
       }
@@ -262,6 +258,42 @@
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyze';
     }
 
+    // ================================
+    //  TRANSCRIPT - Gets REAL transcript from YouTube (no AI)
+    // ================================
+    async function loadTranscript() {
+      if (!currentVideo) { showToast('Analyze video first', true); return; }
+
+      document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+      document.querySelector('.tool-card.transcript').classList.add('active');
+      document.querySelectorAll('.content-area').forEach(a => a.classList.remove('show'));
+      document.getElementById('transcriptArea').classList.add('show');
+      document.getElementById('transcriptArea').scrollIntoView({ behavior: 'smooth' });
+
+      const body = document.getElementById('transcriptBody');
+      body.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Fetching REAL transcript from YouTube...</div>';
+
+      try {
+        const res = await fetch(BACKEND_URL + '/transcript?video_id=' + currentVideo.id, { timeout: 30000 });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.transcript) {
+          realTranscript = data.transcript;
+          body.innerHTML = '<div class="result-text" style="max-height:none">' + realTranscript + '</div>';
+          showToast('Real transcript loaded!');
+        } else {
+          body.innerHTML = '<div class="error-box">' + (data.error || 'No transcript available for this video') + '</div>';
+          realTranscript = '';
+        }
+      } catch (e) {
+        body.innerHTML = '<div class="error-box">Failed to fetch transcript: ' + e.message + '</div>';
+        realTranscript = '';
+      }
+    }
+
+    // ================================
+    //  AI TOOLS - Use AI to analyze
+    // ================================
     async function showTool(tool) {
       if (!currentVideo) { showToast('Analyze video first', true); return; }
 
@@ -286,9 +318,9 @@
             title: currentVideo.title,
             channel: currentVideo.channel,
             views: currentVideo.views,
-            transcript: currentVideo.transcript || ''
+            transcript: realTranscript || ''
           }),
-          timeout: 30000
+          timeout: 60000
         });
 
         const data = await res.json();
@@ -338,14 +370,20 @@
     }
 
     function copySection(section) {
-      if (!fullAnalysis[section]) { showToast('Nothing to copy', true); return; }
-      try {
-        let text = typeof fullAnalysis[section] === 'string' ? fullAnalysis[section] : JSON.stringify(fullAnalysis[section], null, 2);
-        navigator.clipboard.writeText(text);
-        showToast('Copied all!');
-        event.target.classList.add('copied');
-        setTimeout(() => event.target.classList.remove('copied'), 1500);
-      } catch (e) { showToast('Copy failed', true); }
+      if (section === 'transcript') {
+        if (!realTranscript) { showToast('No transcript to copy', true); return; }
+        navigator.clipboard.writeText(realTranscript);
+        showToast('Transcript copied!');
+      } else {
+        if (!fullAnalysis[section]) { showToast('Nothing to copy', true); return; }
+        try {
+          let text = typeof fullAnalysis[section] === 'string' ? fullAnalysis[section] : JSON.stringify(fullAnalysis[section], null, 2);
+          navigator.clipboard.writeText(text);
+          showToast('Copied all!');
+          event.target.classList.add('copied');
+          setTimeout(() => event.target.classList.remove('copied'), 1500);
+        } catch (e) { showToast('Copy failed', true); }
+      }
     }
 
     init();
