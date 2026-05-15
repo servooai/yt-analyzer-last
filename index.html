@@ -7,201 +7,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --red:#FF0000;
-      --cyan:#00D9FF;
-      --gold:#FFD700;
-      --purple:#8B5CF6;
-      --bg:#0F0F1A;
-      --surface:#1A1A2E;
-      --elevated:#242438;
-      --success:#00FF88;
-      --text:#fff;
-      --text2:#A0A0B0;
-      --border:rgba(255,255,255,0.08)
-    }
-    body{
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      line-height:1.6
-    }
-    .container{
-      max-width:1000px;
-      margin:0 auto;
-      padding:2rem 1rem
-    }
-
-    /* Header */
-    .header{
-      text-align:center;
-      margin-bottom:2rem;
-      padding:2.5rem 2rem;
-      background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(0,217,255,0.08));
-      border-radius:20px;
-      border:1px solid rgba(139,92,246,0.3)
-    }
-    .logo{
-      width:70px;
-      height:70px;
-      background:linear-gradient(135deg,var(--red),var(--purple));
-      border-radius:16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:0 auto 1rem;
-      animation:pulse 2.5s infinite
-    }
-    @keyframes pulse{
-      0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)}
-      50%{box-shadow:0 0 0 15px rgba(139,92,246,0)}
-    }
+    :root{--red:#FF0000;--cyan:#00D9FF;--gold:#FFD700;--purple:#8B5CF6;--bg:#0F0F1A;--surface:#1A1A2E;--elevated:#242438;--success:#00FF88;--text:#fff;--text2:#A0A0B0;--border:rgba(255,255,255,0.08)}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .container{max-width:1000px;margin:0 auto;padding:2rem 1rem}
+    .header{text-align:center;margin-bottom:2rem;padding:2.5rem 2rem;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(0,217,255,0.08));border-radius:20px;border:1px solid rgba(139,92,246,0.3)}
+    .logo{width:70px;height:70px;background:linear-gradient(135deg,var(--red),var(--purple));border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:pulse 2.5s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)}50%{box-shadow:0 0 0 15px rgba(139,92,246,0)}}
     .logo svg{width:35px;height:35px;color:white}
-    .header h1{
-      font-size:1.8rem;
-      font-weight:700;
-      background:linear-gradient(90deg,var(--red),var(--purple),var(--cyan));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent
-    }
-    .header p{color:var(--text2);margin-top:0.5rem;font-size:0.95rem}
-
-    /* URL Section */
-    .url-section{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:1.5rem;
-      margin-bottom:1.5rem
-    }
-    .url-section h3{color:var(--cyan);margin-bottom:1rem;font-size:1rem}
+    .header h1{font-size:1.8rem;font-weight:700;background:linear-gradient(90deg,var(--red),var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .header p{color:var(--text2);margin-top:0.5rem}
+    .url-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+    .url-section h3{color:var(--cyan);margin-bottom:1rem}
     .url-group{display:flex;gap:0.75rem;flex-wrap:wrap}
-    .url-input{
-      flex:1;
-      min-width:250px;
-      background:var(--elevated);
-      border:2px solid var(--border);
-      border-radius:12px;
-      padding:1rem;
-      color:var(--text);
-      font-size:1rem;
-      outline:none;
-      transition:border-color 0.3s
-    }
+    .url-input{flex:1;min-width:250px;background:var(--elevated);border:2px solid var(--border);border-radius:12px;padding:1rem;color:var(--text);font-size:1rem;outline:none;transition:border-color 0.3s}
     .url-input:focus{border-color:var(--purple)}
-    .url-input::placeholder{color:var(--text2)}
-    .analyze-btn{
-      padding:1rem 2rem;
-      background:var(--red);
-      border:none;
-      border-radius:12px;
-      color:white;
-      font-weight:600;
-      font-size:1rem;
-      cursor:pointer;
-      transition:all 0.3s;
-      display:flex;
-      align-items:center;
-      gap:0.5rem
-    }
+    .analyze-btn{padding:1rem 2rem;background:var(--red);border:none;border-radius:12px;color:white;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:0.5rem}
     .analyze-btn:hover{transform:scale(1.02);filter:brightness(1.1)}
-    .analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-    .analyze-btn svg{width:18px;height:18px}
-    .status-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:0.4rem;
-      padding:0.4rem 0.8rem;
-      border-radius:8px;
-      font-size:0.8rem;
-      margin-top:0.75rem;
-      width:fit-content
-    }
+    .analyze-btn:disabled{opacity:0.5;cursor:not-allowed}
+    .status-badge{display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;margin-top:0.75rem}
     .status-badge.ok{background:rgba(0,255,136,0.1);color:var(--success);border:1px solid var(--success)}
     .status-badge.off{background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid var(--gold)}
     .status-badge.err{background:rgba(255,71,87,0.1);color:#FF4757;border:1px solid #FF4757}
     .status-badge .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
-
-    /* Video Info */
-    .video-info{
-      background:var(--elevated);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:1.5rem;
-      margin-bottom:1.5rem;
-      display:none
-    }
+    .video-info{background:var(--elevated);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;display:none}
     .video-info.show{display:block}
     .video-main{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
-    .video-thumb{
-      width:180px;
-      height:101px;
-      border-radius:10px;
-      object-fit:cover;
-      flex-shrink:0
-    }
-    @media(max-width:600px){.video-thumb{width:100%;height:auto;aspect-ratio:16/9}}
+    .video-thumb{width:180px;height:101px;border-radius:10px;object-fit:cover}
     .video-details{flex:1;min-width:200px}
-    .video-details h2{font-size:1.05rem;font-weight:600;margin-bottom:0.3rem;line-height:1.4}
-    .video-channel{color:var(--text2);font-size:0.85rem;margin-bottom:0.5rem}
-    .video-stats{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:0.75rem
-    }
-    @media(max-width:500px){
-      .video-stats{grid-template-columns:repeat(2,1fr)}
-      .url-group{flex-direction:column}
-    }
-    .stat-item{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:0.75rem;
-      text-align:center
-    }
+    .video-details h2{font-size:1.05rem;font-weight:600;margin-bottom:0.3rem}
+    .video-channel{color:var(--text2);font-size:0.85rem}
+    .video-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
+    @media(max-width:500px){.video-stats{grid-template-columns:repeat(2,1fr)}.url-group{flex-direction:column}}
+    .stat-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem;text-align:center}
     .stat-item .value{font-size:1.2rem;font-weight:700;color:var(--cyan)}
     .stat-item .label{font-size:0.7rem;color:var(--text2);margin-top:0.2rem}
-    .stat-item.highlight{
-      background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,217,255,0.05));
-      border-color:rgba(0,255,136,0.3)
-    }
+    .stat-item.highlight{background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,217,255,0.05));border-color:rgba(0,255,136,0.3)}
     .stat-item.highlight .value{color:var(--success)}
-
-    /* Tools Grid */
-    .tools-grid{
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:0.75rem;
-      margin-bottom:1.5rem
-    }
+    .tools-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1.5rem}
     @media(max-width:768px){.tools-grid{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:480px){.tools-grid{grid-template-columns:repeat(2,1fr)}}
-    .tool-card{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:1rem 0.5rem;
-      cursor:pointer;
-      transition:all 0.3s;
-      text-align:center
-    }
-    .tool-card:hover,.tool-card.active{
-      border-color:var(--purple);
-      transform:translateY(-3px);
-      box-shadow:0 8px 25px rgba(139,92,246,0.15)
-    }
-    .tool-card .icon{
-      width:44px;
-      height:44px;
-      border-radius:10px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:0 auto 0.5rem;
-      font-size:1.2rem
-    }
+    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 0.5rem;cursor:pointer;transition:all 0.3s;text-align:center}
+    .tool-card:hover,.tool-card.active{border-color:var(--purple);transform:translateY(-3px);box-shadow:0 8px 25px rgba(139,92,246,0.15)}
+    .tool-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem}
     .tool-card.transcript .icon{background:rgba(255,0,0,0.15);color:var(--red)}
     .tool-card.hook .icon{background:rgba(139,92,246,0.15);color:var(--purple)}
     .tool-card.script .icon{background:rgba(0,217,255,0.15);color:var(--cyan)}
@@ -209,67 +56,18 @@
     .tool-card.desc .icon{background:rgba(0,255,136,0.15);color:var(--success)}
     .tool-card h4{font-size:0.85rem;margin-bottom:0.15rem;font-weight:600}
     .tool-card span{font-size:0.7rem;color:var(--text2)}
-
-    /* Content Area */
-    .content-area{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:1.5rem;
-      margin-bottom:1.5rem;
-      display:none
-    }
+    .content-area{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;display:none}
     .content-area.show{display:block}
-    .content-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:1rem;
-      flex-wrap:wrap;
-      gap:0.5rem
-    }
+    .content-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem}
     .content-header h3{color:var(--purple);font-size:1rem;font-weight:600}
-    .copy-btn{
-      padding:0.5rem 1rem;
-      background:var(--elevated);
-      border:1px solid var(--border);
-      border-radius:8px;
-      color:var(--text);
-      cursor:pointer;
-      font-size:0.8rem;
-      transition:all 0.2s
-    }
+    .copy-btn{padding:0.5rem 1rem;background:var(--elevated);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:0.8rem;transition:all 0.2s}
     .copy-btn:hover{border-color:var(--cyan);color:var(--cyan)}
     .copy-btn.copied{border-color:var(--success);color:var(--success)}
-
-    /* Results */
-    .result-text{
-      background:var(--elevated);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:1rem;
-      line-height:1.8;
-      white-space:pre-wrap;
-      max-height:450px;
-      overflow-y:auto;
-      margin-bottom:0.75rem;
-      font-size:0.9rem
-    }
+    .result-text{background:var(--elevated);border:1px solid var(--border);border-radius:10px;padding:1rem;line-height:1.8;white-space:pre-wrap;max-height:450px;overflow-y:auto;margin-bottom:0.75rem;font-size:0.9rem}
     .result-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem}
-    .result-list li{
-      padding:0.75rem 1rem;
-      background:var(--elevated);
-      border:1px solid var(--border);
-      border-radius:8px;
-      cursor:pointer;
-      transition:all 0.2s;
-      font-size:0.9rem;
-      line-height:1.5
-    }
+    .result-list li{padding:0.75rem 1rem;background:var(--elevated);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.9rem;line-height:1.5}
     .result-list li:hover{border-color:var(--purple);transform:translateX(-4px)}
     .result-list li span{color:var(--purple);font-weight:700;margin-right:0.5rem}
-
-    /* Loading */
     .loading-state{padding:2rem;text-align:center;color:var(--text2)}
     .loading-state svg{animation:spin 1s linear infinite;margin-bottom:0.75rem;color:var(--purple)}
     @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -278,66 +76,34 @@
     .loading-dots span:nth-child(2){animation-delay:0.2s}
     .loading-dots span:nth-child(3){animation-delay:0.4s}
     @keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:0.5}40%{transform:scale(1);opacity:1}}
-
-    /* Error */
-    .error-box{
-      background:rgba(255,71,87,0.08);
-      border:1px solid rgba(255,71,87,0.3);
-      border-radius:10px;
-      padding:1rem;
-      color:#FF4757;
-      font-size:0.9rem
-    }
-
-    /* Toast */
-    .toast{
-      position:fixed;
-      bottom:1.5rem;
-      left:50%;
-      transform:translateX(-50%) translateY(100px);
-      background:var(--surface);
-      border:1px solid var(--success);
-      border-radius:10px;
-      padding:0.75rem 1.25rem;
-      z-index:1000;
-      opacity:0;
-      transition:all 0.3s;
-      font-size:0.9rem
-    }
+    .error-box{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.3);border-radius:10px;padding:1rem;color:#FF4757}
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid var(--success);border-radius:10px;padding:0.75rem 1.25rem;z-index:1000;opacity:0;transition:all 0.3s}
     .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
     .toast.error{border-color:#FF4757}
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <div class="logo">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
       </div>
       <h1>YouTube AI Analyzer</h1>
       <p>Analyze YouTube content with AI</p>
     </div>
 
-    <!-- URL Input -->
     <div class="url-section">
       <h3>Enter YouTube Video URL</h3>
       <div class="url-group">
         <input type="text" class="url-input" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." onkeypress="if(event.key==='Enter')startAnalysis()">
         <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           Analyze
         </button>
       </div>
-      <div id="statusBadge" class="status-badge off">
-        <span class="dot"></span>
-        <span id="statusText">Connecting...</span>
-      </div>
+      <div id="statusBadge" class="status-badge off"><span class="dot"></span><span id="statusText">Connecting...</span></div>
     </div>
 
-    <!-- Video Info -->
     <div class="video-info" id="videoInfo">
       <div class="video-main">
         <img class="video-thumb" id="vThumb" src="" alt="">
@@ -354,93 +120,44 @@
       </div>
     </div>
 
-    <!-- Tools -->
     <div class="tools-grid">
-      <div class="tool-card transcript" onclick="showTool('transcript')">
-        <div class="icon">&#128221;</div>
-        <h4>Transcript</h4>
-        <span>Full Text</span>
-      </div>
-      <div class="tool-card hook" onclick="showTool('hook')">
-        <div class="icon">&#9889;</div>
-        <h4>Hook Analysis</h4>
-        <span>First Minute</span>
-      </div>
-      <div class="tool-card script" onclick="showTool('script')">
-        <div class="icon">&#9998;</div>
-        <h4>Similar Script</h4>
-        <span>Generate</span>
-      </div>
-      <div class="tool-card titles" onclick="showTool('titles')">
-        <div class="icon">&#128279;</div>
-        <h4>10 Titles</h4>
-        <span>SEO</span>
-      </div>
-      <div class="tool-card desc" onclick="showTool('desc')">
-        <div class="icon">&#128203;</div>
-        <h4>Description</h4>
-        <span>+ Hashtags</span>
-      </div>
+      <div class="tool-card transcript" onclick="showTool('transcript')"><div class="icon">&#128221;</div><h4>Transcript</h4><span>Full Text</span></div>
+      <div class="tool-card hook" onclick="showTool('hook')"><div class="icon">&#9889;</div><h4>Hook Analysis</h4><span>First Minute</span></div>
+      <div class="tool-card script" onclick="showTool('script')"><div class="icon">&#9998;</div><h4>Similar Script</h4><span>Generate</span></div>
+      <div class="tool-card titles" onclick="showTool('titles')"><div class="icon">&#128279;</div><h4>10 Titles</h4><span>SEO</span></div>
+      <div class="tool-card desc" onclick="showTool('desc')"><div class="icon">&#128203;</div><h4>Description</h4><span>+ Hashtags</span></div>
     </div>
 
-    <!-- Content Areas -->
     <div id="transcriptArea" class="content-area">
-      <div class="content-header">
-        <h3>Full Video Transcript</h3>
-        <button class="copy-btn" onclick="copySection('transcript')">Copy</button>
-      </div>
-      <div id="transcriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Transcript" to load the video text</div></div>
+      <div class="content-header"><h3>Full Video Transcript</h3><button class="copy-btn" onclick="copySection('transcript')">Copy</button></div>
+      <div id="transcriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Transcript" to load</div></div>
     </div>
-
     <div id="hookArea" class="content-area">
-      <div class="content-header">
-        <h3>Hook Analysis - First Minute</h3>
-        <button class="copy-btn" onclick="copySection('hook')">Copy All</button>
-      </div>
-      <div id="hookBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Hook Analysis" to start</div></div>
+      <div class="content-header"><h3>Hook Analysis</h3><button class="copy-btn" onclick="copySection('hook')">Copy All</button></div>
+      <div id="hookBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Hook Analysis"</div></div>
     </div>
-
     <div id="scriptArea" class="content-area">
-      <div class="content-header">
-        <h3>Similar Script</h3>
-        <button class="copy-btn" onclick="copySection('script')">Copy</button>
-      </div>
-      <div id="scriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Similar Script" to generate</div></div>
+      <div class="content-header"><h3>Similar Script</h3><button class="copy-btn" onclick="copySection('script')">Copy</button></div>
+      <div id="scriptBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Similar Script"</div></div>
     </div>
-
     <div id="titlesArea" class="content-area">
-      <div class="content-header">
-        <h3>10 Suggested Titles</h3>
-        <button class="copy-btn" onclick="copySection('titles')">Copy All</button>
-      </div>
-      <div id="titlesBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "10 Titles" to create new titles</div></div>
+      <div class="content-header"><h3>10 Suggested Titles</h3><button class="copy-btn" onclick="copySection('titles')">Copy All</button></div>
+      <div id="titlesBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "10 Titles"</div></div>
     </div>
-
     <div id="descArea" class="content-area">
-      <div class="content-header">
-        <h3>Description + Hashtags</h3>
-        <button class="copy-btn" onclick="copySection('desc')">Copy</button>
-      </div>
-      <div id="descBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Description" to create</div></div>
+      <div class="content-header"><h3>Description + Hashtags</h3><button class="copy-btn" onclick="copySection('desc')">Copy</button></div>
+      <div id="descBody"><div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div><br>Click "Description"</div></div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"><span id="toastMsg">Done!</span></div>
 
   <script>
-    // ============================================
-    //  CONFIG - Update after Deploy
-    // ============================================
-    const BACKEND_URL = 'https://yt-analyzer-last.onrender.com';
+    const BACKEND_URL = 'https://YOUR-BACKEND-URL.onrender.com';
 
-    // State
     let currentVideo = null;
     let fullAnalysis = {};
 
-    // ============================================
-    //  UTILS
-    // ============================================
     function extractId(url) {
       const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
       return m ? m[1] : null;
@@ -456,23 +173,17 @@
 
     function showToast(msg, isError = false) {
       const t = document.getElementById('toast');
-      const m = document.getElementById('toastMsg');
-      m.textContent = msg;
+      document.getElementById('toastMsg').textContent = msg;
       t.className = 'toast' + (isError ? ' error' : '');
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2500);
     }
 
     function setStatus(type, text) {
-      const badge = document.getElementById('statusBadge');
-      const statusText = document.getElementById('statusText');
-      badge.className = 'status-badge ' + type;
-      statusText.textContent = text;
+      document.getElementById('statusBadge').className = 'status-badge ' + type;
+      document.getElementById('statusText').textContent = text;
     }
 
-    // ============================================
-    //  INIT
-    // ============================================
     async function init() {
       try {
         const res = await fetch(BACKEND_URL + '/health', { timeout: 8000 });
@@ -487,9 +198,6 @@
       }
     }
 
-    // ============================================
-    //  ANALYZE VIDEO
-    // ============================================
     async function startAnalysis() {
       const url = document.getElementById('videoUrl').value.trim();
       const id = extractId(url);
@@ -497,30 +205,34 @@
 
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = true;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Analyzing...';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Analyzing...';
 
       try {
-        const oembed = await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + id + '&format=json').then(r => r.json());
+        // Get video data from backend
+        const vres = await fetch(BACKEND_URL + '/video?video_id=' + id, { timeout: 10000 });
+        const vdata = await vres.json();
 
-        let stats = { viewCount: '0', likeCount: '0', commentCount: '0' };
-        try {
-          const sres = await fetch(BACKEND_URL + '/stats?video_id=' + id, { timeout: 8000 });
-          if (sres.ok) {
-            const sdata = await sres.json();
-            if (sdata.success) stats = sdata.stats;
-          }
-        } catch {}
+        if (!vres.ok || !vdata.success) {
+          throw new Error(vdata.error || 'Failed to get video');
+        }
 
-        const views = parseInt(stats.viewCount) || 0;
-        const likes = parseInt(stats.likeCount) || 0;
-        const comments = parseInt(stats.commentCount) || 0;
+        const video = vdata.video;
+        const views = parseInt(video.viewCount) || 0;
+        const likes = parseInt(video.likeCount) || 0;
+        const comments = parseInt(video.commentCount) || 0;
 
         currentVideo = {
-          id, title: oembed.title, channel: oembed.author_name, thumb: oembed.thumbnail_url,
-          views, likes, comments,
+          id: id,
+          title: video.title,
+          channel: video.author || video.channel || video.channelTitle || '',
+          thumb: video.thumbnail,
+          views: views,
+          likes: likes,
+          comments: comments,
           engagement: views > 0 ? ((likes + comments) / views * 100).toFixed(2) : 0
         };
 
+        // Get transcript
         let transcript = '';
         try {
           const tres = await fetch(BACKEND_URL + '/transcript?video_id=' + id, { timeout: 15000 });
@@ -531,6 +243,7 @@
         } catch {}
         currentVideo.transcript = transcript;
 
+        // Update UI
         document.getElementById('vThumb').src = currentVideo.thumb;
         document.getElementById('vTitle').textContent = currentVideo.title;
         document.getElementById('vChannel').textContent = currentVideo.channel;
@@ -540,18 +253,15 @@
         document.getElementById('sEngagement').textContent = currentVideo.engagement + '%';
         document.getElementById('videoInfo').classList.add('show');
 
-        showToast(transcript ? 'Video and transcript loaded' : 'Video loaded');
+        showToast(transcript ? 'Video + Transcript loaded' : 'Video loaded');
       } catch (e) {
         showToast(e.message || 'Error', true);
       }
 
       btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyze';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyze';
     }
 
-    // ============================================
-    //  SHOW TOOL
-    // ============================================
     async function showTool(tool) {
       if (!currentVideo) { showToast('Analyze video first', true); return; }
 
@@ -571,9 +281,12 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            tool, video_id: currentVideo.id, title: currentVideo.title,
-            channel: currentVideo.channel, views: currentVideo.views,
-            engagement: currentVideo.engagement, transcript: currentVideo.transcript || ''
+            tool: tool,
+            video_id: currentVideo.id,
+            title: currentVideo.title,
+            channel: currentVideo.channel,
+            views: currentVideo.views,
+            transcript: currentVideo.transcript || ''
           }),
           timeout: 30000
         });
@@ -590,9 +303,6 @@
       }
     }
 
-    // ============================================
-    //  RENDER RESULTS
-    // ============================================
     function renderResult(tool, data, body) {
       try {
         let parsed = (typeof data === 'string') ? JSON.parse(data.replace(/json\s*/gi, '').replace(/\s*/gi, '').trim()) : data;
@@ -600,39 +310,24 @@
         if (tool === 'titles') {
           const arr = Array.isArray(parsed) ? parsed : parsed.titles || [];
           body.innerHTML = '<ul class="result-list">' + arr.map((t, i) => '<li onclick="copyText(this)"><span>' + (i+1) + '</span>' + (typeof t === 'string' ? t : t.title) + '</li>').join('') + '</ul>';
-
-        } else if (tool === 'transcript') {
-          body.innerHTML =
-            (parsed.fullScript ? '<div class="result-text">' + parsed.fullScript + '</div>' : '') +
-            (parsed.mainTopics ? '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Main Topics</h4><ul class="result-list">' + parsed.mainTopics.map(t => '<li>' + t + '</li>').join('') + '</ul>' : '') +
-            (parsed.keyPoints ? '<h4 style="color:var(--gold);margin:1rem 0 0.5rem">Key Points</h4><ul class="result-list">' + parsed.keyPoints.map(p => '<li>' + p + '</li>').join('') + '</ul>' : '') +
-            (parsed.hookUsed ? '<h4 style="color:var(--success);margin:1rem 0 0.5rem">Hook Used</h4><div class="result-text" style="border-color:var(--success)">' + parsed.hookUsed + '</div>' : '');
-
-        } else if (tool === 'hook') {
-          body.innerHTML =
-            (parsed.hookAnalysis ? '<div class="result-text"><strong style="color:var(--gold)">Hook Analysis:</strong><br>' + parsed.hookAnalysis + '</div>' : '') +
-            (parsed.whyViral ? '<h4 style="color:var(--success);margin:1rem 0 0.5rem">Why It Went Viral</h4><ul class="result-list">' + parsed.whyViral.map(r => '<li>' + r + '</li>').join('') + '</ul>' : '') +
-            (parsed.suggestedHooks ? '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Suggested Hooks</h4><ul class="result-list">' + parsed.suggestedHooks.map(h => '<li>' + (typeof h === 'string' ? h : h.text || h.hook || JSON.stringify(h)) + '</li>').join('') + '</ul>' : '');
-
-        } else if (tool === 'script') {
-          body.innerHTML =
-            (parsed.newHook ? '<h4 style="color:var(--gold);margin-bottom:0.5rem">New Hook</h4><div class="result-text" style="border-color:var(--gold)">' + parsed.newHook + '</div>' : '') +
-            (parsed.newScript ? '<h4 style="color:var(--purple);margin:1rem 0 0.5rem">Full Script</h4><div class="result-text" style="white-space:pre-wrap">' + parsed.newScript + '</div>' : '') +
-            (parsed.keyMoments ? '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Key Moments</h4><ul class="result-list">' + parsed.keyMoments.map(m => '<li>' + (typeof m === 'string' ? m : JSON.stringify(m)) + '</li>').join('') + '</ul>' : '');
-
-        } else if (tool === 'desc') {
-          body.innerHTML =
-            (parsed.description ? '<h4 style="color:var(--purple);margin-bottom:0.5rem">Description</h4><div class="result-text" style="white-space:pre-wrap">' + parsed.description + '</div>' : '') +
-            (parsed.hashtags ? '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">Hashtags</h4><div class="result-text">' + (Array.isArray(parsed.hashtags) ? parsed.hashtags.join(' ') : parsed.hashtags) + '</div>' : '');
+        } else {
+          let html = '';
+          for (const [key, value] of Object.entries(parsed)) {
+            if (Array.isArray(value)) {
+              html += '<h4 style="color:var(--cyan);margin:1rem 0 0.5rem">' + key.replace(/([A-Z])/g, ' $1').trim() + '</h4>';
+              html += '<ul class="result-list">' + value.map(v => '<li>' + (typeof v === 'string' ? v : JSON.stringify(v)) + '</li>').join('') + '</ul>';
+            } else if (typeof value === 'string' && value.length > 0) {
+              html += '<h4 style="color:var(--gold);margin:1rem 0 0.5rem">' + key.replace(/([A-Z])/g, ' $1').trim() + '</h4>';
+              html += '<div class="result-text">' + value + '</div>';
+            }
+          }
+          body.innerHTML = html || '<div class="result-text">' + JSON.stringify(parsed, null, 2) + '</div>';
         }
       } catch {
         body.innerHTML = '<div class="result-text">' + (typeof data === 'string' ? data : JSON.stringify(data, null, 2)) + '</div>';
       }
     }
 
-    // ============================================
-    //  COPY FUNCTIONS
-    // ============================================
     function copyText(el) {
       const text = el.textContent.replace(/^\d+\s*/, '');
       navigator.clipboard.writeText(text);
@@ -643,37 +338,16 @@
     }
 
     function copySection(section) {
-      if (!fullAnalysis[section]) { showToast('No content to copy', true); return; }
+      if (!fullAnalysis[section]) { showToast('Nothing to copy', true); return; }
       try {
-        let text = '';
-        const data = fullAnalysis[section];
-        if (typeof data === 'string') {
-          text = data;
-        } else {
-          if (section === 'titles') {
-            text = (data.titles || data || []).map((t, i) => (i+1) + '. ' + (typeof t === 'string' ? t : t.title)).join('\n');
-          } else if (section === 'transcript') {
-            text = data.fullScript || JSON.stringify(data, null, 2);
-          } else if (section === 'hook') {
-            text = (data.hookAnalysis || '') + '\n\nWhy Viral:\n' + (data.whyViral || []).join('\n') + '\n\nSuggested Hooks:\n' + (data.suggestedHooks || []).map(h => typeof h === 'string' ? h : h.text || JSON.stringify(h)).join('\n');
-          } else if (section === 'script') {
-            text = 'Hook:\n' + (data.newHook || '') + '\n\nScript:\n' + (data.newScript || '') + '\n\nKey Moments:\n' + (data.keyMoments || []).join('\n');
-          } else if (section === 'desc') {
-            text = (data.description || '') + '\n\n' + (Array.isArray(data.hashtags) ? data.hashtags.join(' ') : data.hashtags || '');
-          }
-        }
+        let text = typeof fullAnalysis[section] === 'string' ? fullAnalysis[section] : JSON.stringify(fullAnalysis[section], null, 2);
         navigator.clipboard.writeText(text);
         showToast('Copied all!');
         event.target.classList.add('copied');
         setTimeout(() => event.target.classList.remove('copied'), 1500);
-      } catch (e) {
-        showToast('Copy failed', true);
-      }
+      } catch (e) { showToast('Copy failed', true); }
     }
 
-    // ============================================
-    //  START
-    // ============================================
     init();
   </script>
 </body>
