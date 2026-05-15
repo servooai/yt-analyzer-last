@@ -1,6 +1,5 @@
 """
 YouTube AI Analyzer - Backend Server
-بيستخدم لجلب الترجمة الحقيقية من فيديوهات يوتيوب + OpenAI AI
 """
 
 from flask import Flask, request, jsonify
@@ -13,15 +12,11 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-# إعداد OpenAI
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
-
-# إنشاء instance من YouTubeTranscriptApi
 ytt_api = YouTubeTranscriptApi()
 
 def extract_video_id(url_or_id):
-    """استخراج الـ video ID من رابط يوتيوب"""
     patterns = [
         r'(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})',
         r'^([a-zA-Z0-9_-]{11})$'
@@ -33,10 +28,8 @@ def extract_video_id(url_or_id):
     return None
 
 def ask_ai(prompt, system_prompt="أنت مساعد ذكي"):
-    """إرسال طلب لـ OpenAI"""
     if not client:
-        return "❌ OpenAI API غير مربوط. يرجى إضافة OPENAI_API_KEY في إعدادات Render."
-    
+        return "❌ OpenAI API غير مربوط"
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -45,7 +38,7 @@ def ask_ai(prompt, system_prompt="أنت مساعد ذكي"):
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=1000
+            max_tokens=2000
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -53,68 +46,43 @@ def ask_ai(prompt, system_prompt="أنت مساعد ذكي"):
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """فحص حالة السيرفر"""
     return jsonify({
         'status': 'ok',
-        'message': 'YouTube Analyzer Backend is running!',
         'openai_enabled': bool(client)
     })
 
-@app.route('/transcript', methods=['GET', 'POST'])
+@app.route('/transcript', methods=['GET'])
 def get_transcript():
-    """جلب الترجمة الكاملة لفيديو يوتيوب"""
-    video_input = request.args.get('video_id') or request.args.get('url', '')
-    
-    if not video_input:
-        return jsonify({'error': 'لم يتم توفير معرف الفيديو'}), 400
-    
-    video_id = extract_video_id(video_input)
+    video_id = request.args.get('video_id', '')
     if not video_id:
-        return jsonify({'error': 'رابط أو معرف فيديو غير صالح'}), 400
+        return jsonify({'error': 'Video ID required'}), 400
+    
+    video_id = extract_video_id(video_id)
+    if not video_id:
+        return jsonify({'error': 'Invalid video ID'}), 400
     
     try:
-        transcript = ytt_api.fetch(
-            video_id,
-            languages=['ar', 'en', 'es', 'de', 'fr', 'pt', 'it']
-        )
-        
-        formatted_lines = []
+        transcript = ytt_api.fetch(video_id, languages=['ar', 'en', 'es', 'de', 'fr', 'pt', 'it'])
+        lines = []
         for entry in transcript:
-            start_seconds = int(entry.start)
-            minutes = start_seconds // 60
-            seconds = start_seconds % 60
+            mins = int(entry.start) // 60
+            secs = int(entry.start) % 60
             text = entry.text.replace('\n', ' ').strip()
             if text:
-                formatted_lines.append(f"[{minutes:02d}:{seconds:02d}] {text}")
-        
-        full_transcript = '\n'.join(formatted_lines)
-        
-        return jsonify({
-            'success': True,
-            'video_id': video_id,
-            'transcript': full_transcript
-        })
+                lines.append(f"[{mins:02d}:{secs:02d}] {text}")
+        return jsonify({'success': True, 'video_id': video_id, 'transcript': '\n'.join(lines)})
     except Exception as e:
-        error_message = str(e)
-        if 'No transcripts were found' in error_message:
-            return jsonify({'error': 'لا توجد ترجمة متاحة لهذا الفيديو', 'video_id': video_id}), 404
-        elif 'Video unavailable' in error_message:
-            return jsonify({'error': 'الفيديو غير متاح أو محذوف', 'video_id': video_id}), 404
-        else:
-            return jsonify({'error': f'حدث خطأ: {error_message}', 'video_id': video_id}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/video-info', methods=['GET'])
 def get_video_info():
-    """جلب معلومات الفيديو"""
-    video_id = request.args.get('video_id')
+    video_id = extract_video_id(request.args.get('video_id', ''))
     if not video_id:
-        return jsonify({'error': 'معرف الفيديو مطلوب'}), 400
+        return jsonify({'error': 'Invalid video ID'}), 400
     try:
-        video_id = extract_video_id(video_id)
-        import urllib.request
-        import json
-        oembed_url = f'https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json'
-        with urllib.request.urlopen(oembed_url, timeout=10) as response:
+        import urllib.request, json
+        url = f'https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json'
+        with urllib.request.urlopen(url, timeout=10) as response:
             data = json.loads(response.read().decode())
             return jsonify({
                 'success': True,
@@ -124,123 +92,49 @@ def get_video_info():
                 'thumbnail': f'https://img.youtube.com/vi/{video_id}/hqdefault.jpg'
             })
     except Exception as e:
-        return jsonify({'error': str(e), 'video_id': video_id}), 500
+        return jsonify({'error': str(e)}), 500
 
-# ====== ميزات OpenAI ======
-
-@app.route('/ai/hook-analysis', methods=['POST'])
-def hook_analysis():
-    """تحليل الهوك"""
+@app.route('/ai/analyze', methods=['POST'])
+def analyze():
     data = request.get_json()
+    tool = data.get('tool', '')
     transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""を分析 هذا الفيديو:
-{transcript[:3000]}
+    title = data.get('title', '')
+    channel = data.get('channel', '')
 
-أعطني:
-1. أفضل 5 هوكات (فتحات) للفيديو
-2. لماذا كل هوك يعمل
-3. مثال على نص لكل هوك"""
-    
-    result = ask_ai(prompt, "أنت خبير في تحليل محتوى يوتيوب")
-    return jsonify({'success': True, 'result': result})
+    prompts = {
+        'transcript': f"""Analyze this YouTube video:
+Title: {title}
+Channel: {channel}
+Transcript: {transcript[:4000]}
+Return JSON with: mainTopics (5-8), keyPoints (20), fullScript, hookUsed""",
 
-@app.route('/ai/first-minute', methods=['POST'])
-def first_minute():
-    """اقتراح أول دقيقة"""
-    data = request.get_json()
-    transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""بناءً على هذا المحتوى:
-{transcript[:3000]}
+        'hook': f"""Analyze hook for:
+Title: {title}
+Transcript: {transcript[:3000]}
+Return JSON with: hookAnalysis, whyViral (5-7), suggestedHooks (10)""",
 
-أعطني:
-1. أول 3 ثواني - جملة جذب الانتباه
-2. أول 10 ثواني - فتح قوي
-3. أول 30 ثانية - بناء الفضول
-4. أول دقيقة كاملة - هيكل واضح"""
-    
-    result = ask_ai(prompt, "أنت خبير في كتابة سكريبت يوتيوب")
-    return jsonify({'success': True, 'result': result})
+        'script': f"""Generate similar script:
+Title: {title}
+Transcript: {transcript[:3000]}
+Return JSON with: newHook, newScript, keyMoments (5-7)""",
 
-@app.route('/ai/similar-script', methods=['POST'])
-def similar_script():
-    """اقتراح سكريبت مشابه"""
-    data = request.get_json()
-    transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""بناءً على هذا الفيديو:
-{transcript[:3000]}
+        'titles': f"""Generate 10 titles for:
+{title}
+Transcript: {transcript[:2000]}
+Return JSON array of 10 titles""",
 
-اكتب لي سكريبت جديد للفيديو بنفس الأسلوب والهيكل"""
-    
-    result = ask_ai(prompt, "أنت كاتب محترف لسكريبت يوتيوب")
-    return jsonify({'success': True, 'result': result})
+        'desc': f"""Generate description and hashtags:
+Title: {title}
+Transcript: {transcript[:2000]}
+Return JSON with: description (300-500 words), hashtags (15)"""
+    }
 
-@app.route('/ai/titles', methods=['POST'])
-def generate_titles():
-    """اقتراح عناوين"""
-    data = request.get_json()
-    transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""بناءً على هذا الفيديو:
-{transcript[:2000]}
+    if tool not in prompts:
+        return jsonify({'error': 'Invalid tool'}), 400
 
-أعطني 10 عناوين جذابة بالإنجليزية:
-1. عنوان 1
-2. عنوان 2
-... (حتى 10)"""
-    
-    result = ask_ai(prompt, "أنت خبير في SEO وعناوين يوتيوب")
-    return jsonify({'success': True, 'result': result})
-
-@app.route('/ai/seo-titles', methods=['POST'])
-def seo_titles():
-    """عناوين SEO"""
-    data = request.get_json()
-    transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""بناءً على هذا الفيديو:
-{transcript[:2000]}
-
-أعطني 10 عناوين SEO مثالية بالإنجليزية"""
-    
-    result = ask_ai(prompt, "أنت خبير في SEO")
-    return jsonify({'success': True, 'result': result})
-
-@app.route('/ai/description', methods=['POST'])
-def description():
-    """اقتراح وصف"""
-    data = request.get_json()
-    transcript = data.get('transcript', '')
-    
-    if not transcript:
-        return jsonify({'error': 'الترجمة مطلوبة'}), 400
-    
-    prompt = f"""بناءً على هذا الفيديو:
-{transcript[:2000]}
-
-أعطني:
-1. وصف كامل (300-500 كلمة)
-2. 15 هاشتاق مناسب"""
-    
-    result = ask_ai(prompt, "أنت خبير في كتابة وصف يوتيوب")
+    result = ask_ai(prompts[tool], "You are a YouTube content analyst. Return JSON only.")
     return jsonify({'success': True, 'result': result})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
